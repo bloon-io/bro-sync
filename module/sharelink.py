@@ -7,6 +7,7 @@ import json
 import inspect
 from WssApiCaller import WssApiCaller
 
+
 class BroSync:
 
     def __init__(self):
@@ -22,16 +23,53 @@ class BroSync:
     async def getTree(self, shareID):
         async with websockets.connect(self.__apiUrl, ssl=self.__ssl_context) as wss:
             api = WssApiCaller(wss)
-            outData = await api.getShareInfo_async({"token": None, "shareID": shareID})
+            outData = await api.getShareInfo_async({"shareID": shareID})
             shareData = outData["data"]["shareData"]
             itemID = shareData["itemID"]
             isFolder = shareData["isFolder"]
 
             if isFolder:
-                outData = await api.getFolder_async({"token": None, "shareID": shareID, "folderID": itemID})
-                print(outData)
+                outAll = await api.getFolder_async({"shareID": shareID, "folderID": itemID})
+                outData = outAll["data"]
+
+                isRecycled = outData["isRecycled"]
+                if not isRecycled:
+                    folderID = outData["folderID"] # it should be the same as "itemID"
+
+                    name = outData["name"]
+                    modifyTime = outData["modifyTime"] # TODO [?] need to be persistent, used in the future
+                    childCards = outData["childCards"]
+                    childFolders = outData["childFolders"]
+
+                    for childCard in childCards:
+                        chC_isRecycled = childCard["isRecycled"]
+                        if not chC_isRecycled:
+                            chC_name = childCard["name"]
+                            chC_extension = childCard["extension"]
+                            chC_version = childCard["version"]  # int # TODO need to be persistent, used in the future
+                            chC_checksum = childCard["checksum"] # binary in base64 format string # TODO need to be persistent, used in the future
+                            
+                            chC_finalLocalRelPath = "/" + name + "/" + chC_name + "." + chC_extension
+                            print(chC_finalLocalRelPath)
+                            # TODO to store all chC_finalLocalRelPath
+
+                    for childFolder in childFolders:
+                        chF_isRecycled = childFolder["isRecycled"]
+                        if not chF_isRecycled:
+                            chF_name = childFolder["name"]
+                            chF_finalLocalRelPath = "/" + name + "/" + chF_name
+                            print(chF_finalLocalRelPath)
+                            # TODO to store all chF_finalLocalRelPath
+                            # TODO to make recursive func. call
+
             else:
-                pass
+                """
+                It will enter this block if only sharelink itself is not a folder.
+                """
+                # outAll = await api.getCard_async({"shareID": shareID, "cardID": itemID})
+                # outData = outAll["data"]
+                # print(outData)
+                print("[INFO] This sharelink is not a folder.")
 
 
 class Main:
