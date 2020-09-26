@@ -1,1 +1,1 @@
-# bro-sync
+BLOON Read-Only Sync
