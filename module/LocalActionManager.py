@@ -6,9 +6,12 @@ class LocalActionManager:
     def __init__(self):
         pass
 
-    def doDiffAction(self):
+    def doDiffAction(self, diffListForAction):
+        """
+        diffListForAction is a tuple: (folder_paths_need_to_make, file_paths_need_to_download)
+        """
+
         # TODO now-here to impl.
-        # (folder_paths_need_to_make, file_paths_need_to_download)
         pass
 
 

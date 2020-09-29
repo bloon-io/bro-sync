@@ -9,7 +9,7 @@ class Main:
         tdm = TreeDataManager(workDir)
 
         # --------------------------------------------------
-        await tdm.retrieveTreeDataRemote_async(shareID)
+        await tdm.retrieveCurrentTreeDataRemote_async(shareID)
         treeData_remote_current = tdm.getCurrentTreeDataRemote()
         print("----------")
         print("current")
@@ -18,7 +18,7 @@ class Main:
         print()
 
         # --------------------------------------------------
-        tdm.loadTreeDataRemote()
+        tdm.loadPreviousTreeDataRemote()
         treeData_remote_previous = tdm.getPreviousTreeDataRemote()
         print("----------")
         print("previous")
@@ -27,8 +27,8 @@ class Main:
         print()
 
         # --------------------------------------------------
-        diffListTuple = tdm.createDiffListForAction(
-            treeData_remote_current, treeData_remote_previous)
+        tdm.createDiffListForAction()
+        diffListTuple = tdm.getDiffForAction()
         print("----------")
         print("diff")
         print("----------")
@@ -36,7 +36,7 @@ class Main:
         print()
 
         # --------------------------------------------------
-        tdm.storeTreeDataRemote(treeData_remote_current)
+        tdm.storeCurrentAsPrevious()
 
 
 if __name__ == "__main__":
