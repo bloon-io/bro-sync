@@ -7,11 +7,15 @@ class LocalActionManager:
         pass
 
     def doDiffAction(self, diffListForAction):
-        """
-        diffListForAction is a tuple: (folder_paths_need_to_make, file_paths_need_to_download)
-        """
+        # diffListForAction is a tuple: (folder_paths_need_to_make, file_paths_need_to_download)
 
         # TODO now-here to impl.
+
+        # TODO to creat folder all list
+        # TODO to download all files (optimize by checksumRevIdx table)
+        # TODO to compare local tree
+        # TODO to del garbage files & folders
+
         pass
 
 
