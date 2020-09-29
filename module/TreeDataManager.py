@@ -19,8 +19,11 @@ class TreeDataManager:
 
     def __init__(self, workDir):
         self.WORK_DIR_ABS_PATH_STR = os.path.abspath(workDir)
+        
         self.__bloonRootDir = None
         self.__broSyncDbFileAbsPath = None
+        self.__treeData_remote_current = None
+        self.__treeData_remote_previous = None
 
         self.__apiUrl = "wss://192.168.1.198:8443/Bloon_Adjutant/api"  # test
         # self.__apiUrl = "wss://adj-xiaolongbao.bloon.io/Bloon_Adjutant/api"
@@ -33,7 +36,7 @@ class TreeDataManager:
 
     def storeTreeDataRemote(self, treeData):
         if self.__bloonRootDir is None:
-            print("[INFO] Please call getTreeDataRemote_async() first.")
+            print("[INFO] Please call retrieveTreeDataRemote_async() first.")
         else:
             os.makedirs(self.__bloonRootDir, exist_ok=True)
             with SqliteDict(self.__broSyncDbFileAbsPath, tablename="folder_set") as folder_set_db:
@@ -92,12 +95,15 @@ class TreeDataManager:
         # print("file_paths_need_to_download: " + str(file_paths_need_to_download))
         return (folder_paths_need_to_make, file_paths_need_to_download)
 
+    def getPreviousTreeDataRemote(self):
+        return self.__treeData_remote_previous
+
     def loadTreeDataRemote(self):
         """
         Return None if no data stored or any kind of err. 
         """
         if self.__bloonRootDir is None:
-            print("[INFO] Please call getTreeDataRemote_async() first.")
+            print("[INFO] Please call retrieveTreeDataRemote_async() first.")
         else:
             if (not os.path.exists(self.__bloonRootDir)) or (not os.path.exists(self.__broSyncDbFileAbsPath)):
                 return None
@@ -117,9 +123,12 @@ class TreeDataManager:
                     file_dict_mem[tmpKey] = tmpVal
                 treeData["file_dict"] = file_dict_mem
 
-            return treeData
+            self.__treeData_remote_previous = treeData
 
-    async def getTreeDataRemote_async(self, shareID):
+    def getCurrentTreeDataRemote(self):
+        return self.__treeData_remote_current
+
+    async def retrieveTreeDataRemote_async(self, shareID):
 
         # Tree data to return
         treeData = {
@@ -169,7 +178,7 @@ class TreeDataManager:
                 # print(outData)
                 print("[INFO] This sharelink is not a folder.")
 
-        return treeData
+        self.__treeData_remote_current = treeData
 
     async def __getChildFolderRecursiveUnit_async(self, api, shareID, folderID, localRelPath, treeData):
 
@@ -221,32 +230,3 @@ class TreeDataManager:
 
                 treeData["file_dict"][chC_localRelPath] = (
                     chC_version, chC_checksum_str)
-
-
-class Main:
-    async def main(self):
-        shareID = "JJ5RWaBV"  # test data
-        # shareID = "WZys1ZoW" # test data
-        workDir = "C:\\Users\\patwnag\\Desktop\\"
-        tdm = TreeDataManager(workDir)
-
-        # --------------------------------------------------
-        treeData_remote_current = await tdm.getTreeDataRemote_async(shareID)
-        # print(treeData_remote_current)
-        # print("----------")
-
-        # --------------------------------------------------
-        treeData_remote_previous = tdm.loadTreeDataRemote()
-        # print(treeData_remote_previous)
-        # print("----------")
-
-        # --------------------------------------------------
-        diffListTuple = tdm.createDiffListForAction(
-            treeData_remote_current, treeData_remote_previous)
-        print(diffListTuple)
-
-        tdm.storeTreeDataRemote(treeData_remote_current)
-
-
-if __name__ == "__main__":
-    asyncio.get_event_loop().run_until_complete(Main().main())
