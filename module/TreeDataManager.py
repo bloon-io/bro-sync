@@ -12,7 +12,7 @@ from WssApiCaller import WssApiCaller
 from sqlitedict import SqliteDict
 
 
-class BroSync:
+class TreeDataManager:
 
     WSS_CLIENT_PAYLOAD_MAX_SIZE = 10 * 1024 * 1024  # 10MB
     DB_FILE_NAME = ".bro-sync.db"
@@ -51,11 +51,10 @@ class BroSync:
 
                 file_dict_db.commit()
 
-    """
-    return a tuple: (folder_paths_need_to_make, file_paths_need_to_download)
-    """
-
     def createDiffListForAction(self, treeData_remote_current, treeData_remote_previous):
+        """
+        return a tuple: (folder_paths_need_to_make, file_paths_need_to_download)
+        """
         folder_paths_need_to_make = []
         file_paths_need_to_download = []
 
@@ -93,11 +92,10 @@ class BroSync:
         # print("file_paths_need_to_download: " + str(file_paths_need_to_download))
         return (folder_paths_need_to_make, file_paths_need_to_download)
 
-    """
-    Return None if no data stored or any kind of err. 
-    """
-
     def loadTreeDataRemote(self):
+        """
+        Return None if no data stored or any kind of err. 
+        """
         if self.__bloonRootDir is None:
             print("[INFO] Please call getTreeDataRemote_async() first.")
         else:
@@ -131,7 +129,7 @@ class BroSync:
             "file_dict": {}
         }
 
-        async with websockets.connect(self.__apiUrl, ssl=self.__ssl_context, max_size=BroSync.WSS_CLIENT_PAYLOAD_MAX_SIZE) as wss:
+        async with websockets.connect(self.__apiUrl, ssl=self.__ssl_context, max_size=TreeDataManager.WSS_CLIENT_PAYLOAD_MAX_SIZE) as wss:
             api = WssApiCaller(wss)
             outData = await api.getShareInfo_async({"shareID": shareID})
             shareData = outData["data"]["shareData"]
@@ -202,7 +200,7 @@ class BroSync:
         # os.makedirs(self.__bloonRootDir, exist_ok=True)
 
         self.__broSyncDbFileAbsPath = os.path.join(
-            self.__bloonRootDir, BroSync.DB_FILE_NAME)
+            self.__bloonRootDir, TreeDataManager.DB_FILE_NAME)
         print("[DEBUG] db file: [" + self.__broSyncDbFileAbsPath + "]")
         treeData["folder_set"][root_localRelPath] = None
 
@@ -230,24 +228,24 @@ class Main:
         shareID = "JJ5RWaBV"  # test data
         # shareID = "WZys1ZoW" # test data
         workDir = "C:\\Users\\patwnag\\Desktop\\"
-        bs = BroSync(workDir)
+        tdm = TreeDataManager(workDir)
 
         # --------------------------------------------------
-        treeData_remote_current = await bs.getTreeDataRemote_async(shareID)
+        treeData_remote_current = await tdm.getTreeDataRemote_async(shareID)
         # print(treeData_remote_current)
         # print("----------")
 
         # --------------------------------------------------
-        treeData_remote_previous = bs.loadTreeDataRemote()
+        treeData_remote_previous = tdm.loadTreeDataRemote()
         # print(treeData_remote_previous)
         # print("----------")
 
         # --------------------------------------------------
-        diffListTuple = bs.createDiffListForAction(
+        diffListTuple = tdm.createDiffListForAction(
             treeData_remote_current, treeData_remote_previous)
         print(diffListTuple)
 
-        bs.storeTreeDataRemote(treeData_remote_current)
+        tdm.storeTreeDataRemote(treeData_remote_current)
 
 
 if __name__ == "__main__":
