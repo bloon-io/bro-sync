@@ -6,6 +6,8 @@ import websockets
 import json
 import inspect
 import os
+import base64
+import copy
 from WssApiCaller import WssApiCaller
 from sqlitedict import SqliteDict
 
@@ -31,25 +33,47 @@ class BroSync:
 
     # def getTreeLocal(self):
     #     if self.__bloonRootDir is None:
-    #         print("[INFO] Please call getTreeRemote_async() first.")
+    #         print("[INFO] Please call getTreeDataRemote_async() first.")
     #     else:
     #         # Tree data to return
     #         treeData = {
     #             # elements are just localRelPath string of folders
     #             "all_folders_localRelPath_set": {},
-    #             # element key: localRelPath string of file; element value: Tuple ==> (version:int, checksum:base64 string)
+    #             # element key: localRelPath string of file; element value: Tuple ==> (version:int, checksum: string)
     #             "all_files_localRelPath_dict": {}
     #         }
     #         # TODO to impl. later
     #         return treeData
 
-    async def getTreeRemote_async(self, shareID):
+    def storeTreeData(self, treeData):
+
+        if self.__bloonRootDir is None:
+            print("[INFO] Please call getTreeDataRemote_async() first.")
+        else:
+            os.makedirs(self.__bloonRootDir)
+            
+            with SqliteDict(self.__broSyncDbFileAbsPath, tablename="all_folders_localRelPath_set") as folder_set_db:
+                folder_set = treeData["all_folders_localRelPath_set"]
+                for tmpKey in folder_set:
+                    folder_set_db[tmpKey] = None
+
+                folder_set_db.commit()
+
+            with SqliteDict(self.__broSyncDbFileAbsPath, tablename="all_files_localRelPath_dict") as files_dict_db:
+                files_dict = treeData["all_files_localRelPath_dict"]
+                for tmpKey in files_dict:
+                    tmpVal = files_dict[tmpKey]
+                    files_dict_db[tmpKey] = tmpVal
+
+                files_dict_db.commit()
+
+    async def getTreeDataRemote_async(self, shareID):
 
         # Tree data to return
         treeData = {
             # elements are just localRelPath string of folders
             "all_folders_localRelPath_set": {},
-            # element key: localRelPath string of file; element value: Tuple ==> (version:int, checksum:base64 string)
+            # element key: localRelPath string of file; element value: Tuple ==> (version:int, checksum: string)
             "all_files_localRelPath_dict": {}
         }
 
@@ -138,19 +162,13 @@ class BroSync:
                 chC_version = childCard["version"]  # int
                 # binary in base64 format string
                 chC_checksum_b64str = childCard["checksum"]
+                chC_checksum_str = base64.b64decode(
+                    chC_checksum_b64str).decode("UTF-8")
 
                 chC_localRelPath = localRelPath + "/" + chC_name + "." + chC_extension
 
                 treeData["all_files_localRelPath_dict"][chC_localRelPath] = (
-                    chC_version, chC_checksum_b64str)
-
-    def __getFoldersDict(self):
-        # elements are just localRelPath string of folders
-        return SqliteDict(self.__broSyncDbFileAbsPath, tablename="all_folders_localRelPath_set")
-
-    def __getFilesDict(self):
-        # element key: localRelPath string of file; element value: Tuple ==> (version:int, checksum:base64 string)
-        return SqliteDict(self.__broSyncDbFileAbsPath, tablename="all_files_localRelPath_dict")
+                    chC_version, chC_checksum_str)
 
 
 class Main:
@@ -161,8 +179,10 @@ class Main:
 
         bs = BroSync(workDir)
 
-        treeData_remote = await bs.getTreeRemote_async(shareID)
-        print(treeData_remote)
+        treeData_remote = await bs.getTreeDataRemote_async(shareID)
+        # print(treeData_remote)
+
+        bs.storeTreeData(treeData_remote)
 
         # treeData_local = bs.getTreeLocal()
 
