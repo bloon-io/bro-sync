@@ -31,20 +31,20 @@ class BroSync:
         self.__ssl_context.check_hostname = False  # for test only
         self.__ssl_context.verify_mode = ssl.CERT_NONE  # for test only
 
-    def storeTreeData(self, treeData):
+    def storeTreeDataRemote(self, treeData):
         if self.__bloonRootDir is None:
             print("[INFO] Please call getTreeDataRemote_async() first.")
         else:
             os.makedirs(self.__bloonRootDir, exist_ok=True)
-            with SqliteDict(self.__broSyncDbFileAbsPath, tablename="folder_set__previous") as folder_set_db:
-                folder_set = treeData["folder_set__previous"]
+            with SqliteDict(self.__broSyncDbFileAbsPath, tablename="folder_set") as folder_set_db:
+                folder_set = treeData["folder_set"]
                 for tmpKey in folder_set:
                     folder_set_db[tmpKey] = None
 
                 folder_set_db.commit()
 
-            with SqliteDict(self.__broSyncDbFileAbsPath, tablename="file_dict__previous") as file_dict_db:
-                file_dict = treeData["file_dict__previous"]
+            with SqliteDict(self.__broSyncDbFileAbsPath, tablename="file_dict") as file_dict_db:
+                file_dict = treeData["file_dict"]
                 for tmpKey in file_dict:
                     tmpVal = file_dict[tmpKey]
                     file_dict_db[tmpKey] = tmpVal
@@ -52,29 +52,72 @@ class BroSync:
                 file_dict_db.commit()
 
     """
+    return a tuple: (folder_paths_need_to_make, file_paths_need_to_download)
+    """
+
+    def createDiffListForAction(self, treeData_remote_current, treeData_remote_previous):
+        folder_paths_need_to_make = []
+        file_paths_need_to_download = []
+
+        # --------------------------------------------------
+        # for folders
+        # --------------------------------------------------
+        folder_set__current = treeData_remote_current["folder_set"]
+        folder_set__previous = {
+        } if treeData_remote_previous is None else treeData_remote_previous["folder_set"]
+
+        # all new file path need to download
+        deff_folder_set = folder_set__current.keys() - folder_set__previous.keys()
+        folder_paths_need_to_make.extend(deff_folder_set)
+
+        # --------------------------------------------------
+        # for files
+        # --------------------------------------------------
+        file_dict__current = treeData_remote_current["file_dict"]
+        file_dict__previous = {
+        } if treeData_remote_previous is None else treeData_remote_previous["file_dict"]
+
+        # all new file path need to download
+        deff_file_set = file_dict__current.keys() - file_dict__previous.keys()
+        file_paths_need_to_download.extend(deff_file_set)
+
+        # all intersection file path need to compare version
+        inter_set = file_dict__current.keys() & file_dict__previous.keys()
+        for tmpPath in inter_set:
+            v__current = file_dict__current[tmpPath][0]
+            v__previous = file_dict__previous[tmpPath][0]
+            if v__current > v__previous:
+                file_paths_need_to_download.append(tmpPath)
+
+        # print("folder_paths_need_to_make: " + str(folder_paths_need_to_make))
+        # print("file_paths_need_to_download: " + str(file_paths_need_to_download))
+        return (folder_paths_need_to_make, file_paths_need_to_download)
+
+    """
     Return None if no data stored or any kind of err. 
     """
+
     def loadTreeDataRemote(self):
         if self.__bloonRootDir is None:
             print("[INFO] Please call getTreeDataRemote_async() first.")
         else:
             if (not os.path.exists(self.__bloonRootDir)) or (not os.path.exists(self.__broSyncDbFileAbsPath)):
                 return None
-            
+
             treeData = {}
 
-            with SqliteDict(self.__broSyncDbFileAbsPath, tablename="folder_set__previous") as folder_set_db:
+            with SqliteDict(self.__broSyncDbFileAbsPath, tablename="folder_set") as folder_set_db:
                 folder_set_mem = {}
                 for tmpKey in folder_set_db:
                     folder_set_mem[tmpKey] = None
-                treeData["folder_set__previous"] = folder_set_mem
+                treeData["folder_set"] = folder_set_mem
 
-            with SqliteDict(self.__broSyncDbFileAbsPath, tablename="file_dict__previous") as file_dict_db:
+            with SqliteDict(self.__broSyncDbFileAbsPath, tablename="file_dict") as file_dict_db:
                 file_dict_mem = {}
                 for tmpKey in file_dict_db:
                     tmpVal = file_dict_db[tmpKey]
                     file_dict_mem[tmpKey] = tmpVal
-                treeData["file_dict__previous"] = file_dict_mem
+                treeData["file_dict"] = file_dict_mem
 
             return treeData
 
@@ -83,9 +126,9 @@ class BroSync:
         # Tree data to return
         treeData = {
             # elements are just localRelPath string of folders
-            "folder_set__previous": {},
+            "folder_set": {},
             # element key: localRelPath string of file; element value: Tuple ==> (version:int, checksum: string)
-            "file_dict__previous": {}
+            "file_dict": {}
         }
 
         async with websockets.connect(self.__apiUrl, ssl=self.__ssl_context, max_size=BroSync.WSS_CLIENT_PAYLOAD_MAX_SIZE) as wss:
@@ -132,7 +175,7 @@ class BroSync:
 
     async def __getChildFolderRecursiveUnit_async(self, api, shareID, folderID, localRelPath, treeData):
 
-        treeData["folder_set__previous"][localRelPath] = None
+        treeData["folder_set"][localRelPath] = None
 
         outAll = await api.getFolder_async({"shareID": shareID, "folderID": folderID})
         outData = outAll["data"]
@@ -161,7 +204,7 @@ class BroSync:
         self.__broSyncDbFileAbsPath = os.path.join(
             self.__bloonRootDir, BroSync.DB_FILE_NAME)
         print("[DEBUG] db file: [" + self.__broSyncDbFileAbsPath + "]")
-        treeData["folder_set__previous"][root_localRelPath] = None
+        treeData["folder_set"][root_localRelPath] = None
 
     def __handle_childFiles(self, localRelPath, childCards, treeData):
 
@@ -178,7 +221,8 @@ class BroSync:
 
                 chC_localRelPath = localRelPath + "/" + chC_name + "." + chC_extension
 
-                treeData["file_dict__previous"][chC_localRelPath] = (chC_version, chC_checksum_str)
+                treeData["file_dict"][chC_localRelPath] = (
+                    chC_version, chC_checksum_str)
 
 
 class Main:
@@ -190,16 +234,20 @@ class Main:
 
         # --------------------------------------------------
         treeData_remote_current = await bs.getTreeDataRemote_async(shareID)
-        print(treeData_remote_current)
-        print("----------")
+        # print(treeData_remote_current)
+        # print("----------")
 
         # --------------------------------------------------
         treeData_remote_previous = bs.loadTreeDataRemote()
-        print(treeData_remote_previous)
-        print("----------")
+        # print(treeData_remote_previous)
+        # print("----------")
 
-        
-        bs.storeTreeData(treeData_remote_current)
+        # --------------------------------------------------
+        diffListTuple = bs.createDiffListForAction(
+            treeData_remote_current, treeData_remote_previous)
+        print(diffListTuple)
+
+        bs.storeTreeDataRemote(treeData_remote_current)
 
 
 if __name__ == "__main__":
