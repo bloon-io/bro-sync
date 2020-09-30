@@ -10,6 +10,7 @@ import base64
 import copy
 from WssApiCaller import WssApiCaller
 from sqlitedict import SqliteDict
+from Ctx import Ctx
 
 
 class TreeDataManager:
@@ -33,8 +34,9 @@ class TreeDataManager:
         # self.__apiUrl = "wss://adj-bubble-tea.bloon.io/Bloon_Adjutant/api"
 
         self.__ssl_context = ssl.SSLContext(ssl.PROTOCOL_TLS_CLIENT)
-        self.__ssl_context.check_hostname = False  # for test only
-        self.__ssl_context.verify_mode = ssl.CERT_NONE  # for test only
+        if Ctx.CLOSE_SSL_CERT_VERIFY:
+            self.__ssl_context.check_hostname = False  # for test only
+            self.__ssl_context.verify_mode = ssl.CERT_NONE  # for test only
 
     """
     ==================================================
@@ -104,8 +106,7 @@ class TreeDataManager:
         # for folders
         # --------------------------------------------------
         folder_set__current = self.__treeData_remote_current["folder_set"]
-        folder_set__previous = {
-        } if self.__treeData_remote_previous is None else self.__treeData_remote_previous["folder_set"]
+        folder_set__previous = {} if self.__treeData_remote_previous is None else self.__treeData_remote_previous["folder_set"]
 
         # all new file path need to download
         deff_folder_set = folder_set__current.keys() - folder_set__previous.keys()
@@ -115,8 +116,7 @@ class TreeDataManager:
         # for files
         # --------------------------------------------------
         file_dict__current = self.__treeData_remote_current["file_dict"]
-        file_dict__previous = {
-        } if self.__treeData_remote_previous is None else self.__treeData_remote_previous["file_dict"]
+        file_dict__previous = {} if self.__treeData_remote_previous is None else self.__treeData_remote_previous["file_dict"]
 
         # all new file path need to download
         deff_file_set = file_dict__current.keys() - file_dict__previous.keys()
@@ -133,8 +133,7 @@ class TreeDataManager:
         # print("folder_paths_need_to_make: " + str(folder_paths_need_to_make))
         # print("file_paths_need_to_download: " + str(file_paths_need_to_download))
 
-        self.__folders_and_files_diff_list_for_action = (
-            folder_paths_need_to_make, file_paths_need_to_download)
+        self.__folders_and_files_diff_list_for_action = (folder_paths_need_to_make, file_paths_need_to_download)
 
     def loadPreviousTreeDataRemote(self):
         if self.__bloonRootDir is None:
@@ -202,17 +201,13 @@ class TreeDataManager:
                     root_localRelPath = name
                     treeData["folder_set"][root_localRelPath] = None
 
-                    self.__bloonRootDir = os.path.join(
-                        self.WORK_DIR_ABS_PATH_STR, root_localRelPath)
+                    self.__bloonRootDir = os.path.join(self.WORK_DIR_ABS_PATH_STR, root_localRelPath)
                     print("[DEBUG] __bloonRootDir: [" + self.__bloonRootDir + "]")
 
-                    self.__broSyncDbFileAbsPath = os.path.join(
-                        self.WORK_DIR_ABS_PATH_STR, TreeDataManager.DB_FILE_NAME)
-                    print("[DEBUG] __broSyncDbFileAbsPath: [" +
-                          self.__broSyncDbFileAbsPath + "]")
+                    self.__broSyncDbFileAbsPath = os.path.join(self.WORK_DIR_ABS_PATH_STR, TreeDataManager.DB_FILE_NAME)
+                    print("[DEBUG] __broSyncDbFileAbsPath: [" + self.__broSyncDbFileAbsPath + "]")
 
-                    self.__handle_childFiles(
-                        root_localRelPath, childCards, treeData)
+                    self.__handle_childFiles(root_localRelPath, childCards, treeData)
 
                     for childFolder in childFolders:
                         chF_isRecycled = childFolder["isRecycled"]
@@ -265,12 +260,9 @@ class TreeDataManager:
                 chC_name = childCard["name"]
                 chC_extension = childCard["extension"]
                 chC_version = childCard["version"]  # int
-                # binary in base64 format string
-                chC_checksum_b64str = childCard["checksum"]
-                chC_checksum_str = base64.b64decode(
-                    chC_checksum_b64str).decode("UTF-8")
+                chC_checksum_b64str = childCard["checksum"]  # binary in base64 format string
+                chC_checksum_str = base64.b64decode(chC_checksum_b64str).decode("UTF-8")
 
                 chC_localRelPath = localRelPath + "/" + chC_name + "." + chC_extension
 
-                treeData["file_dict"][chC_localRelPath] = (
-                    chC_version, chC_checksum_str)
+                treeData["file_dict"][chC_localRelPath] = (chC_version, chC_checksum_str)
