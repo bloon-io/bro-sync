@@ -8,10 +8,10 @@ class Main:
         shareID = "JJ5RWaBV"  # test data
         # shareID = "WZys1ZoW" # test data
         workDir = "C:\\Users\\patwnag\\Desktop\\"
-        tdm = TreeDataManager(workDir)
+        tdm = TreeDataManager(workDir, shareID)
 
         # --------------------------------------------------
-        await tdm.retrieveCurrentTreeDataRemote_async(shareID)
+        await tdm.retrieveCurrentTreeDataRemote_async()
         treeData_remote_current = tdm.getCurrentTreeDataRemote()
         print("----------")
         print("current")

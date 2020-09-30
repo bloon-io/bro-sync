@@ -17,8 +17,9 @@ class TreeDataManager:
     WSS_CLIENT_PAYLOAD_MAX_SIZE = 10 * 1024 * 1024  # 10MB
     DB_FILE_NAME = ".bro-sync.db"
 
-    def __init__(self, workDir):
+    def __init__(self, workDir, shareID):
         self.WORK_DIR_ABS_PATH_STR = os.path.abspath(workDir)
+        self.SHARE_ID = shareID
 
         self.__bloonRootDir = None
         self.__broSyncDbFileAbsPath = None
@@ -40,9 +41,10 @@ class TreeDataManager:
     Simple getter/setter def. START
     ==================================================
     """
+
     def getWorkDir(self):
         return self.WORK_DIR_ABS_PATH_STR
-        
+
     def getBloonRootDir(self):
         return self.__bloonRootDir
 
@@ -71,8 +73,6 @@ class TreeDataManager:
         if self.__bloonRootDir is None:
             print("[INFO] Please call retrieveCurrentTreeDataRemote_async() first.")
         else:
-            os.makedirs(self.__bloonRootDir, exist_ok=True)
-            
             with SqliteDict(self.__broSyncDbFileAbsPath, tablename="ctx") as ctx_db:
                 ctx_db.clear()
                 ctx = self.__treeData_remote_current["ctx"]
@@ -167,7 +167,7 @@ class TreeDataManager:
 
             self.__treeData_remote_previous = treeData
 
-    async def retrieveCurrentTreeDataRemote_async(self, shareID):
+    async def retrieveCurrentTreeDataRemote_async(self):
 
         # Tree data to return
         treeData = {
@@ -182,13 +182,13 @@ class TreeDataManager:
 
         async with websockets.connect(self.__apiUrl, ssl=self.__ssl_context, max_size=TreeDataManager.WSS_CLIENT_PAYLOAD_MAX_SIZE) as wss:
             api = WssApiCaller(wss)
-            outData = await api.getShareInfo_async({"shareID": shareID})
+            outData = await api.getShareInfo_async({"shareID": self.SHARE_ID})
             shareData = outData["data"]["shareData"]
             itemID = shareData["itemID"]
             isFolder = shareData["isFolder"]
 
             if isFolder:
-                outAll = await api.getFolder_async({"shareID": shareID, "folderID": itemID})
+                outAll = await api.getFolder_async({"shareID": self.SHARE_ID, "folderID": itemID})
                 outData = outAll["data"]
 
                 isRecycled = outData["isRecycled"]
@@ -201,13 +201,16 @@ class TreeDataManager:
                     treeData["ctx"]["bloon_name"] = name
                     root_localRelPath = name
                     treeData["folder_set"][root_localRelPath] = None
-                    
-                    self.__bloonRootDir = os.path.join(self.WORK_DIR_ABS_PATH_STR, root_localRelPath)
+
+                    self.__bloonRootDir = os.path.join(
+                        self.WORK_DIR_ABS_PATH_STR, root_localRelPath)
                     print("[DEBUG] __bloonRootDir: [" + self.__bloonRootDir + "]")
 
-                    self.__broSyncDbFileAbsPath = os.path.join(self.WORK_DIR_ABS_PATH_STR, TreeDataManager.DB_FILE_NAME)
-                    print("[DEBUG] __broSyncDbFileAbsPath: [" + self.__broSyncDbFileAbsPath + "]")
-                    
+                    self.__broSyncDbFileAbsPath = os.path.join(
+                        self.WORK_DIR_ABS_PATH_STR, TreeDataManager.DB_FILE_NAME)
+                    print("[DEBUG] __broSyncDbFileAbsPath: [" +
+                          self.__broSyncDbFileAbsPath + "]")
+
                     self.__handle_childFiles(
                         root_localRelPath, childCards, treeData)
 
@@ -217,7 +220,7 @@ class TreeDataManager:
                             chF_name = childFolder["name"]
                             chF_folderID = childFolder["folderID"]
                             chF_localRelPath = root_localRelPath + "/" + chF_name
-                            await self.__getChildFolderRecursiveUnit_async(api, shareID, chF_folderID, chF_localRelPath, treeData)
+                            await self.__getChildFolderRecursiveUnit_async(api, self.SHARE_ID, chF_folderID, chF_localRelPath, treeData)
 
             else:
                 """
@@ -230,7 +233,8 @@ class TreeDataManager:
 
         self.__treeData_remote_current = treeData
 
-    async def __getChildFolderRecursiveUnit_async(self, api, shareID, folderID, localRelPath, treeData):
+    @staticmethod
+    async def __getChildFolderRecursiveUnit_async(api, shareID, folderID, localRelPath, treeData):
 
         treeData["folder_set"][localRelPath] = None
 
@@ -242,7 +246,7 @@ class TreeDataManager:
             childCards = outData["childCards"]
             childFolders = outData["childFolders"]
 
-        self.__handle_childFiles(localRelPath, childCards, treeData)
+        TreeDataManager.__handle_childFiles(localRelPath, childCards, treeData)
 
         for childFolder in childFolders:
             chF_isRecycled = childFolder["isRecycled"]
@@ -250,9 +254,10 @@ class TreeDataManager:
                 chF_name = childFolder["name"]
                 chF_folderID = childFolder["folderID"]
                 chF_localRelPath = localRelPath + "/" + chF_name
-                await self.__getChildFolderRecursiveUnit_async(api, shareID, chF_folderID, chF_localRelPath, treeData)
+                await TreeDataManager.__getChildFolderRecursiveUnit_async(api, shareID, chF_folderID, chF_localRelPath, treeData)
 
-    def __handle_childFiles(self, localRelPath, childCards, treeData):
+    @staticmethod
+    def __handle_childFiles(localRelPath, childCards, treeData):
 
         for childCard in childCards:
             chC_isRecycled = childCard["isRecycled"]
