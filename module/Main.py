@@ -1,7 +1,9 @@
 import asyncio
 from TreeDataManager import TreeDataManager
+from DiffActionAgent import DiffActionAgent
 
 class Main:
+
     async def main(self):
         shareID = "JJ5RWaBV"  # test data
         # shareID = "WZys1ZoW" # test data
@@ -36,8 +38,11 @@ class Main:
         print()
 
         # --------------------------------------------------
-        tdm.storeCurrentAsPrevious()
+        daa = DiffActionAgent()
+        daa.doDiffAction(tdm)
 
+        # --------------------------------------------------
+        tdm.storeCurrentAsPrevious()
 
 if __name__ == "__main__":
     asyncio.get_event_loop().run_until_complete(Main().main())
