@@ -15,18 +15,23 @@ class DiffActionAgent:
         """
         tdm is TreeDataManager obj.
         """
-        # diffListForAction is a tuple: (folder_paths_need_to_make, file_paths_need_to_download)
-        diffListForAction = tdm.getDiffForAction()
-        folder_paths_need_to_make = diffListForAction[0]
-        file_paths_need_to_download = diffListForAction[1]
-
         # to creat all folders in diff. list
-        for folderRelPath in folder_paths_need_to_make:
-            absPath = os.path.join(tdm.WORK_DIR_ABS_PATH_STR, folderRelPath)
-            print("[DEBUG] mkdir -p: [" + absPath + "]")
-            os.makedirs(absPath, exist_ok=True)
+        DiffActionAgent.__createFoldersByDiff(tdm)
 
         # to download all files in diff. list
+        DiffActionAgent.__downloadFilesByDiff(tdm)
+
+        # TODO to compare local tree and del garbage files & folders
+        
+        # TODO now-here to create local folders set & files set
+
+        # TODO to optimize download by checksumRevIdx table (move rather than download)
+
+    @staticmethod
+    def __downloadFilesByDiff(tdm):
+        # diffListForAction is a tuple: (folder_paths_need_to_make, file_paths_need_to_download)
+        diffListForAction = tdm.getDiffForAction()
+        file_paths_need_to_download = diffListForAction[1]
         for fileRelPath in file_paths_need_to_download:
             direct_link = Ctx.BLOON_DIRECT_LINK_URL_BASE + "/" + tdm.SHARE_ID
             bloon_name = tdm.getCurrentTreeDataRemote()["ctx"]["bloon_name"]
@@ -44,10 +49,12 @@ class DiffActionAgent:
 
             urllib.request.urlretrieve(download_link, file_abs_path)
 
-        # TODO to compare local tree
-        
-
-        # TODO to optimize by checksumRevIdx table (move rather than download)
-        # TODO to del garbage files & folders
-
-        pass
+    @staticmethod
+    def __createFoldersByDiff(tdm):
+        # diffListForAction is a tuple: (folder_paths_need_to_make, file_paths_need_to_download)
+        diffListForAction = tdm.getDiffForAction()
+        folder_paths_need_to_make = diffListForAction[0]
+        for folderRelPath in folder_paths_need_to_make:
+            absPath = os.path.join(tdm.WORK_DIR_ABS_PATH_STR, folderRelPath)
+            print("[DEBUG] mkdir -p: [" + absPath + "]")
+            os.makedirs(absPath, exist_ok=True)

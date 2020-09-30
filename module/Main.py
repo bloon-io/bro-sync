@@ -1,6 +1,8 @@
 import asyncio
+import json
 from TreeDataManager import TreeDataManager
 from DiffActionAgent import DiffActionAgent
+
 
 class Main:
 
@@ -16,7 +18,8 @@ class Main:
         print("----------")
         print("current")
         print("----------")
-        print(treeData_remote_current)
+        # print(treeData_remote_current)
+        print(json.dumps(treeData_remote_current, indent=4, ensure_ascii=False))  # for debug only
         print()
 
         # --------------------------------------------------
@@ -25,7 +28,8 @@ class Main:
         print("----------")
         print("previous")
         print("----------")
-        print(treeData_remote_previous)
+        # print(treeData_remote_previous)
+        print(json.dumps(treeData_remote_previous, indent=4, ensure_ascii=False))  # for debug only
         print()
 
         # --------------------------------------------------
@@ -34,7 +38,7 @@ class Main:
         print("----------")
         print("diff")
         print("----------")
-        print(diffListTuple)
+        print(json.dumps(diffListTuple, indent=4, ensure_ascii=False))  # for debug only
         print()
 
         # --------------------------------------------------
@@ -43,6 +47,7 @@ class Main:
 
         # --------------------------------------------------
         tdm.storeCurrentAsPrevious()
+
 
 if __name__ == "__main__":
     asyncio.get_event_loop().run_until_complete(Main().main())
