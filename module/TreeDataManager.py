@@ -74,6 +74,7 @@ class TreeDataManager:
             os.makedirs(self.__bloonRootDir, exist_ok=True)
             
             with SqliteDict(self.__broSyncDbFileAbsPath, tablename="ctx") as ctx_db:
+                ctx_db.clear()
                 ctx = self.__treeData_remote_current["ctx"]
                 for tmpKey in ctx:
                     tmpVal = ctx[tmpKey]
@@ -81,12 +82,14 @@ class TreeDataManager:
                 ctx_db.commit()
 
             with SqliteDict(self.__broSyncDbFileAbsPath, tablename="folder_set") as folder_set_db:
+                folder_set_db.clear()
                 folder_set = self.__treeData_remote_current["folder_set"]
                 for tmpKey in folder_set:
                     folder_set_db[tmpKey] = None
                 folder_set_db.commit()
 
             with SqliteDict(self.__broSyncDbFileAbsPath, tablename="file_dict") as file_dict_db:
+                file_dict_db.clear()
                 file_dict = self.__treeData_remote_current["file_dict"]
                 for tmpKey in file_dict:
                     tmpVal = file_dict[tmpKey]
