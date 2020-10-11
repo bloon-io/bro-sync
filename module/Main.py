@@ -7,9 +7,11 @@ from DiffActionAgent import DiffActionAgent
 class Main:
 
     async def main(self):
-        shareID = "JJ5RWaBV"  # test data
+        shareID = "WjCz6B10"  # test data NBNO3
+        # shareID = "JJ5RWaBV"  # test data
         # shareID = "WZys1ZoW" # test data
-        workDir = "C:\\Users\\patwnag\\Desktop\\"
+        # workDir = "C:\\Users\\patwnag\\Desktop\\" # TOPNO3
+        workDir = "C:\\Users\\patwang\\Desktop\\" # NBNO3, TOPNO2
         tdm = TreeDataManager(workDir, shareID)
 
         # --------------------------------------------------

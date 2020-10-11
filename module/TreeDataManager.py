@@ -28,10 +28,7 @@ class TreeDataManager:
         self.__treeData_remote_previous = None
         self.__folders_and_files_diff_list_for_action = None
 
-        self.__apiUrl = "wss://192.168.1.198:8443/Bloon_Adjutant/api"  # test
-        # self.__apiUrl = "wss://adj-xiaolongbao.bloon.io/Bloon_Adjutant/api"
-        # self.__apiUrl = "wss://adj-stinky-tofu.bloon.io/Bloon_Adjutant/api"
-        # self.__apiUrl = "wss://adj-bubble-tea.bloon.io/Bloon_Adjutant/api"
+        self.__apiUrl = Ctx.BLOON_ADJ_API_WSS_URL
 
         self.__ssl_context = ssl.SSLContext(ssl.PROTOCOL_TLS_CLIENT)
         if Ctx.CLOSE_SSL_CERT_VERIFY:
@@ -263,6 +260,9 @@ class TreeDataManager:
                 chC_checksum_b64str = childCard["checksum"]  # binary in base64 format string
                 chC_checksum_str = base64.b64decode(chC_checksum_b64str).decode("UTF-8")
 
-                chC_localRelPath = localRelPath + "/" + chC_name + "." + chC_extension
+                if chC_extension:
+                    chC_localRelPath = localRelPath + "/" + chC_name + "." + chC_extension
+                else:
+                    chC_localRelPath = localRelPath + "/" + chC_name
 
                 treeData["file_dict"][chC_localRelPath] = (chC_version, chC_checksum_str)
