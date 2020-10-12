@@ -11,13 +11,13 @@ class Main:
         # shareID = "WjCz6B10"  # test data NBNO3
         # shareID = "JJ5RWaBV"  # test data
         # shareID = "WZys1ZoW" # test data
-        # workDir = "C:\\Users\\patwnag\\Desktop\\" # TOPNO3
-        workDir = "C:\\Users\\patwang\\Desktop\\" # NBNO3, TOPNO2
-        tdm = RemoteTreeDataManager(workDir, shareID)
+        # workDir = "C:\\Users\\patwnag\\Desktop\\" # TOPNO2
+        workDir = "C:\\Users\\patwang\\Desktop\\"  # NBNO3, TOPNO3
+        rtdm = RemoteTreeDataManager(workDir, shareID)
 
         # --------------------------------------------------
-        await tdm.retrieveCurrentTreeDataRemote_async()
-        treeData_remote_current = tdm.getCurrentTreeDataRemote()
+        await rtdm.retrieveCurrentRemoteTreeData_async()
+        treeData_remote_current = rtdm.getCurrentTreeDataRemote()
         print("----------")
         print("current")
         print("----------")
@@ -26,8 +26,8 @@ class Main:
         print()
 
         # --------------------------------------------------
-        tdm.loadPreviousTreeDataRemote()
-        treeData_remote_previous = tdm.getPreviousTreeDataRemote()
+        rtdm.loadPreviousTreeDataRemote()
+        treeData_remote_previous = rtdm.getPreviousTreeDataRemote()
         print("----------")
         print("previous")
         print("----------")
@@ -36,8 +36,8 @@ class Main:
         print()
 
         # --------------------------------------------------
-        tdm.createDiffListForAction()
-        diffListTuple = tdm.getDiffForAction()
+        rtdm.createDiffListForAction()
+        diffListTuple = rtdm.getDiffForAction()
         print("----------")
         print("diff")
         print("----------")
@@ -46,10 +46,10 @@ class Main:
 
         # --------------------------------------------------
         daa = DiffActionAgent()
-        daa.doDiffAction(tdm)
+        daa.doDiffAction(rtdm)
 
         # --------------------------------------------------
-        tdm.storeCurrentAsPrevious()
+        rtdm.storeCurrentAsPrevious()
 
 
 if __name__ == "__main__":

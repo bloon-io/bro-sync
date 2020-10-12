@@ -16,7 +16,6 @@ from Ctx import Ctx
 class RemoteTreeDataManager:
 
     WSS_CLIENT_PAYLOAD_MAX_SIZE = 10 * 1024 * 1024  # 10MB
-    DB_FILE_NAME = ".bro-sync.db"
 
     def __init__(self, workDir, shareID):
         self.WORK_DIR_ABS_PATH_STR = os.path.abspath(workDir)
@@ -70,7 +69,7 @@ class RemoteTreeDataManager:
 
     def storeCurrentAsPrevious(self):
         if self.__bloonRootDir is None:
-            print("[INFO] Please call retrieveCurrentTreeDataRemote_async() first.")
+            print("[INFO] Please call retrieveCurrentRemoteTreeData_async() first.")
         else:
             with SqliteDict(self.__broSyncDbFileAbsPath, tablename="ctx") as ctx_db:
                 ctx_db.clear()
@@ -134,7 +133,7 @@ class RemoteTreeDataManager:
 
     def loadPreviousTreeDataRemote(self):
         if self.__bloonRootDir is None:
-            print("[INFO] Please call retrieveCurrentTreeDataRemote_async() first.")
+            print("[INFO] Please call retrieveCurrentRemoteTreeData_async() first.")
         else:
             if not os.path.exists(self.__broSyncDbFileAbsPath):
                 return None
@@ -163,7 +162,7 @@ class RemoteTreeDataManager:
 
             self.__treeData_remote_previous = treeData
 
-    async def retrieveCurrentTreeDataRemote_async(self):
+    async def retrieveCurrentRemoteTreeData_async(self):
 
         # Tree data to return
         treeData = {
@@ -201,7 +200,7 @@ class RemoteTreeDataManager:
                     self.__bloonRootDir = os.path.join(self.WORK_DIR_ABS_PATH_STR, root_localRelPath)
                     print("[DEBUG] __bloonRootDir: [" + self.__bloonRootDir + "]")
 
-                    self.__broSyncDbFileAbsPath = os.path.join(self.WORK_DIR_ABS_PATH_STR, RemoteTreeDataManager.DB_FILE_NAME)
+                    self.__broSyncDbFileAbsPath = os.path.join(self.WORK_DIR_ABS_PATH_STR, Ctx.DB_FILE_NAME)
                     print("[DEBUG] __broSyncDbFileAbsPath: [" + self.__broSyncDbFileAbsPath + "]")
 
                     self.__handle_childFiles(root_localRelPath, childCards, treeData)
