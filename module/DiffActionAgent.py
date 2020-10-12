@@ -60,9 +60,12 @@ class DiffActionAgent:
             to_del_abs_path = os.path.join(rtdm.WORK_DIR_ABS_PATH_STR, to_del_rel_path)
             to_del_abs_path = os.path.join(rtdm.WORK_DIR_ABS_PATH_STR, to_del_rel_path)
             
-            shutil.rmtree(to_del_abs_path)
-            print("[DEBUG] rmtree: [" + to_del_abs_path + "]")
-
+            try:
+                shutil.rmtree(to_del_abs_path)
+                print("[DEBUG] rmtree: [" + to_del_abs_path + "]")
+            except:
+                pass
+            
         for to_del_rel_path in file_paths_need_to_del:
             to_del_abs_path = os.path.join(rtdm.WORK_DIR_ABS_PATH_STR, to_del_rel_path)
             try:
