@@ -1,18 +1,19 @@
 import asyncio
 import json
-from TreeDataManager import TreeDataManager
+from RemoteTreeDataManager import RemoteTreeDataManager
 from DiffActionAgent import DiffActionAgent
 
 
 class Main:
 
     async def main(self):
-        shareID = "WjCz6B10"  # test data NBNO3
+        shareID = "OXrq5h3g"  # test data TOPNO3
+        # shareID = "WjCz6B10"  # test data NBNO3
         # shareID = "JJ5RWaBV"  # test data
         # shareID = "WZys1ZoW" # test data
         # workDir = "C:\\Users\\patwnag\\Desktop\\" # TOPNO3
         workDir = "C:\\Users\\patwang\\Desktop\\" # NBNO3, TOPNO2
-        tdm = TreeDataManager(workDir, shareID)
+        tdm = RemoteTreeDataManager(workDir, shareID)
 
         # --------------------------------------------------
         await tdm.retrieveCurrentTreeDataRemote_async()

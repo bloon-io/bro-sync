@@ -2,7 +2,7 @@ import asyncio
 import os
 import urllib.request
 import ssl
-from TreeDataManager import TreeDataManager
+from RemoteTreeDataManager import RemoteTreeDataManager
 from Ctx import Ctx
 
 
@@ -13,7 +13,7 @@ class DiffActionAgent:
 
     def doDiffAction(self, tdm):
         """
-        tdm is TreeDataManager obj.
+        tdm is RemoteTreeDataManager obj.
         """
         # to creat all folders in diff. list
         DiffActionAgent.__createFoldersByDiff(tdm)
