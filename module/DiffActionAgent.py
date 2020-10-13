@@ -26,9 +26,9 @@ class DiffActionAgent:
         # to compare local tree and del garbage files & folders
         DiffActionAgent.__deleteItemsByLocalDiffWithRemote(rtdm)
 
-        # TODO now-here to optimize download by checksumRevIdx table (move rather than download)
+        # TODO to optimize download by checksumRevIdx table (move rather than download)
 
-        # TODO adding non-file item, e.g. B-doc
+        # TODO adding non-file item sync, e.g. B-doc
 
     @staticmethod
     def __deleteItemsByLocalDiffWithRemote(rtdm):
@@ -59,13 +59,13 @@ class DiffActionAgent:
             to_del_abs_path = os.path.join(rtdm.WORK_DIR_ABS_PATH_STR, to_del_rel_path)
             to_del_abs_path = os.path.join(rtdm.WORK_DIR_ABS_PATH_STR, to_del_rel_path)
             to_del_abs_path = os.path.join(rtdm.WORK_DIR_ABS_PATH_STR, to_del_rel_path)
-            
+
             try:
                 shutil.rmtree(to_del_abs_path)
                 print("[DEBUG] rmtree: [" + to_del_abs_path + "]")
             except:
                 pass
-            
+
         for to_del_rel_path in file_paths_need_to_del:
             to_del_abs_path = os.path.join(rtdm.WORK_DIR_ABS_PATH_STR, to_del_rel_path)
             try:
@@ -73,7 +73,7 @@ class DiffActionAgent:
                 print("[DEBUG] rm file: [" + to_del_abs_path + "]")
             except:
                 pass
-            
+
     @staticmethod
     def __createLocalItemSet(rtdm):
         """

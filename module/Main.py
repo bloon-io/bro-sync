@@ -7,12 +7,11 @@ from DiffActionAgent import DiffActionAgent
 class Main:
 
     async def main(self):
-        shareID = "OXrq5h3g"  # test data TOPNO3
-        # shareID = "WjCz6B10"  # test data NBNO3
-        # shareID = "JJ5RWaBV"  # test data
-        # shareID = "WZys1ZoW" # test data
-        # workDir = "C:\\Users\\patwnag\\Desktop\\" # TOPNO2
-        workDir = "C:\\Users\\patwang\\Desktop\\"  # NBNO3, TOPNO3
+        shareID = "klUReHe5"  # test data HW TOPNO2
+        # shareID = "OXrq5h3g"  # test data HW TOPNO3
+        # shareID = "WjCz6B10"  # test data HW NBNO3
+        workDir = "C:\\Users\\patwnag\\Desktop\\" # HW TOPNO2
+        # workDir = "C:\\Users\\patwang\\Desktop\\"  # HW NBNO3, HW TOPNO3
         rtdm = RemoteTreeDataManager(workDir, shareID)
 
         # --------------------------------------------------
