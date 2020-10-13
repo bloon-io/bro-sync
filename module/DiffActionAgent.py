@@ -21,14 +21,25 @@ class DiffActionAgent:
         DiffActionAgent.__createFoldersByDiff(rtdm)
 
         # to download all files in diff. list
-        DiffActionAgent.__downloadFilesByDiff(rtdm)
+        DiffActionAgent.__createFilesByDiff(rtdm)
 
         # to compare local tree and del garbage files & folders
         DiffActionAgent.__deleteItemsByLocalDiffWithRemote(rtdm)
 
-        # TODO to optimize download by checksumRevIdx table (move rather than download)
-
         # TODO adding non-file item sync, e.g. B-doc
+
+    @staticmethod
+    def __create_checksumRevIdxDict(treeData):
+        if not treeData:
+            return {}
+
+        crid = {}  # crid: Checksum Reversed Idx Dict
+        file_dict = treeData["file_dict"]
+
+        for rel_path in file_dict.keys():
+            checksum_str = file_dict[rel_path][1]
+            crid[checksum_str] = rel_path
+        return crid
 
     @staticmethod
     def __deleteItemsByLocalDiffWithRemote(rtdm):
@@ -52,14 +63,20 @@ class DiffActionAgent:
         deff_file_set = local_file_set.keys() - remote_file_dict.keys()
         file_paths_need_to_del.extend(deff_file_set)
 
+        print("----------")
+        print("folder_paths_need_to_del")
+        print("----------")
         print(json.dumps(folder_paths_need_to_del, indent=4, ensure_ascii=False))  # for debug only
+
+        print()
+        print("----------")
+        print("file_paths_need_to_del")
+        print("----------")
         print(json.dumps(file_paths_need_to_del, indent=4, ensure_ascii=False))  # for debug only
+        print()
 
         for to_del_rel_path in folder_paths_need_to_del:
             to_del_abs_path = os.path.join(rtdm.WORK_DIR_ABS_PATH_STR, to_del_rel_path)
-            to_del_abs_path = os.path.join(rtdm.WORK_DIR_ABS_PATH_STR, to_del_rel_path)
-            to_del_abs_path = os.path.join(rtdm.WORK_DIR_ABS_PATH_STR, to_del_rel_path)
-
             try:
                 shutil.rmtree(to_del_abs_path)
                 print("[DEBUG] rmtree: [" + to_del_abs_path + "]")
@@ -103,26 +120,43 @@ class DiffActionAgent:
         return (folder_set, file_set)
 
     @staticmethod
-    def __downloadFilesByDiff(rtdm):
+    def __createFilesByDiff(rtdm):
+        current_file_dict = rtdm.getCurrentTreeDataRemote()["file_dict"]
+        crid_previous = DiffActionAgent.__create_checksumRevIdxDict(rtdm.getPreviousTreeDataRemote())  # crid: Checksum Reversed Idx Dict
+
         # diffListForAction is a tuple: (folder_paths_need_to_make, file_paths_need_to_download)
         diffListForAction = rtdm.getDiffForAction()
         file_paths_need_to_download = diffListForAction[1]
         for fileRelPath in file_paths_need_to_download:
-            direct_link = Ctx.BLOON_DIRECT_LINK_URL_BASE + "/" + rtdm.SHARE_ID
-            bloon_name = rtdm.getCurrentTreeDataRemote()["ctx"]["bloon_name"]
-            directLinkRelPath = fileRelPath[len(bloon_name) + 1:]  # remove leading bloon name, "+1" is for char "/"
-            directLinkRelPath = urllib.parse.quote(directLinkRelPath)  # url percent-encoding
+            checksum = current_file_dict[fileRelPath][1]
 
-            download_link = direct_link + "/" + directLinkRelPath
-            print("[DEBUG] download_link: [" + download_link + "]")
+            same_file_rel_path_previous = crid_previous.get(checksum)
+            if same_file_rel_path_previous:
+                try:
+                    DiffActionAgent.__createFileByCopy(rtdm, fileRelPath, same_file_rel_path_previous)
+                except Exception as e:
+                    print("[WARN] copy file exception. e: [" + str(e) + "]")
+                    DiffActionAgent.__createFileByDownload(rtdm, fileRelPath)
+            else:
+                DiffActionAgent.__createFileByDownload(rtdm, fileRelPath)
 
-            file_abs_path = os.path.join(rtdm.WORK_DIR_ABS_PATH_STR, fileRelPath)
-            # print("[DEBUG] download file_abs_path: [" + file_abs_path + "]")
+    @staticmethod
+    def __createFileByDownload(rtdm, fileRelPath):
+        direct_link = Ctx.BLOON_DIRECT_LINK_URL_BASE + "/" + rtdm.SHARE_ID
+        bloon_name = rtdm.getCurrentTreeDataRemote()["ctx"]["bloon_name"]
+        directLinkRelPath = fileRelPath[len(bloon_name) + 1:]  # remove leading bloon name, "+1" is for char "/"
+        directLinkRelPath = urllib.parse.quote(directLinkRelPath)  # url percent-encoding
 
-            if Ctx.CLOSE_SSL_CERT_VERIFY:
-                ssl._create_default_https_context = ssl._create_unverified_context
+        download_link = direct_link + "/" + directLinkRelPath
+        print("[DEBUG] download_link: [" + download_link + "]")
 
-            urllib.request.urlretrieve(download_link, file_abs_path)
+        file_abs_path = os.path.join(rtdm.WORK_DIR_ABS_PATH_STR, fileRelPath)
+        # print("[DEBUG] download file_abs_path: [" + file_abs_path + "]")
+
+        if Ctx.CLOSE_SSL_CERT_VERIFY:
+            ssl._create_default_https_context = ssl._create_unverified_context
+
+        urllib.request.urlretrieve(download_link, file_abs_path)
 
     @staticmethod
     def __createFoldersByDiff(rtdm):
@@ -133,3 +167,17 @@ class DiffActionAgent:
             absPath = os.path.join(rtdm.WORK_DIR_ABS_PATH_STR, folderRelPath)
             print("[DEBUG] mkdir -p: [" + absPath + "]")
             os.makedirs(absPath, exist_ok=True)
+
+    @staticmethod
+    def __createFileByCopy(rtdm, fileRelPath, same_file_rel_path_previous):
+        src_file_abs_path = os.path.join(rtdm.WORK_DIR_ABS_PATH_STR, same_file_rel_path_previous)
+        dest_file_abs_path = os.path.join(rtdm.WORK_DIR_ABS_PATH_STR, fileRelPath)
+        shutil.copy2(src_file_abs_path, dest_file_abs_path)
+        print("[DEBUG] copy file, from [" + same_file_rel_path_previous + "], to [" + fileRelPath + "]")
+
+    # @staticmethod
+    # def __createFileByMove(rtdm, fileRelPath, same_file_rel_path_previous):
+    #     src_file_abs_path = os.path.join(rtdm.WORK_DIR_ABS_PATH_STR, same_file_rel_path_previous)
+    #     dest_file_abs_path = os.path.join(rtdm.WORK_DIR_ABS_PATH_STR, fileRelPath)
+    #     shutil.move(src_file_abs_path, dest_file_abs_path)
+    #     print("[DEBUG] move file, from [" + same_file_rel_path_previous + "], to [" + fileRelPath + "]")
