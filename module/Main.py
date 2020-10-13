@@ -11,6 +11,10 @@ class Main:
 
     # TODO impl. BroSync.start_sync_service
 
+    # TODO test in linux env.
+
+    # TODO write README
+
     async def main(self):
         shareID = "klUReHe5"  # test data HW TOPNO2
         # shareID = "OXrq5h3g"  # test data HW TOPNO3
