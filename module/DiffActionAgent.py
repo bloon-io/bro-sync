@@ -26,8 +26,6 @@ class DiffActionAgent:
         # to compare local tree and del garbage files & folders
         DiffActionAgent.__deleteItemsByLocalDiffWithRemote(rtdm)
 
-        # TODO adding non-file item sync, e.g. B-doc
-
     @staticmethod
     def __create_checksumRevIdxDict(treeData):
         if not treeData:
