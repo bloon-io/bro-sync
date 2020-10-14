@@ -2,6 +2,8 @@ import asyncio
 import json
 import sys
 import textwrap
+import argparse
+from argparse import RawTextHelpFormatter
 from bro_sync.tree_data import RemoteTreeDataManager
 from bro_sync.action import DiffActionAgent
 from bro_sync.sync import BroSync
@@ -13,25 +15,28 @@ class Main:
     WORK_DIR = None
 
     async def main(self):
-        shareId = sys.argv[1] if len(sys.argv) >= 2 else Main.SHARE_ID
-        workDir = sys.argv[2] if len(sys.argv) >= 3 else Main.WORK_DIR
 
-        if (not shareId) or (not workDir):
-            print(textwrap.dedent("""
-                Usage: python main.py SHARE_ID WORK_DIR
-                SHARE_ID is a BLOON sharelink ID of your folder.
-                WORK_DIR is the place you want to put your sync. folder.
+        parser = argparse.ArgumentParser(description=textwrap.indent(textwrap.dedent("""
+                To synchronize folder you shared through a BLOON sharelink.
 
                 The following line shows how to get an ID from a sharelink:
                 https://www.bloon.io/share/[a sharelink ID]/
 
-                How to get a shearlink? See https://www.bloon.io/help/sharelinks
-                """))
-            return
+                How to get a shearlink?
+                See https://www.bloon.io/help/sharelinks
+                """), "  "), formatter_class=RawTextHelpFormatter)
+
+        parser.add_argument("SHARE_ID", type=str, help="A BLOON sharelink ID of your folder.")
+        parser.add_argument("WORK_DIR", type=str, help="The place you want to put your sync. folder.")
+        parser.add_argument("-s", "--service", action="store_true", default=False, help="start and keep syncing")
+        args = parser.parse_args()
 
         # --------------------------------------------------
-        broSync = BroSync(shareId, workDir)
-        await broSync.sync_once_async()
+        broSync = BroSync(args.SHARE_ID, args.WORK_DIR)
+        if args.service:
+            await broSync.start_sync_service_async()
+        else:
+            await broSync.sync_once_async()
 
 
 if __name__ == "__main__":

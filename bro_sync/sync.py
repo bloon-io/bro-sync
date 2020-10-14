@@ -1,8 +1,10 @@
 
 import asyncio
 import json
+import time
 from bro_sync.tree_data import RemoteTreeDataManager
 from bro_sync.action import DiffActionAgent
+from bro_sync.ctx import Ctx
 
 
 class BroSync:
@@ -11,8 +13,16 @@ class BroSync:
         self.shareID = shareID
         self.workDir = workDir
 
-    async def sync_once_async(self):
+    async def start_sync_service_async(self):
+        print("[INFO] bro-sync servcie start.")
+        try:
+            while True:
+                await self.sync_once_async()
+                time.sleep(Ctx.SERVICE_SYNC_LOOP_INTERVAL)
+        except:
+            print("[INFO] bro-sync servcie stop.")
 
+    async def sync_once_async(self):
         rtdm = RemoteTreeDataManager(self.workDir, self.shareID)
 
         # --------------------------------------------------
@@ -50,6 +60,3 @@ class BroSync:
 
         # --------------------------------------------------
         rtdm.storeCurrentAsPrevious()
-
-    def start_sync_service(self):
-        pass
