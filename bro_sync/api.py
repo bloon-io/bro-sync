@@ -1,5 +1,8 @@
 import json
 import inspect
+import logging
+
+log = logging.getLogger("bro-sync")
 
 
 class WssApiCaller:

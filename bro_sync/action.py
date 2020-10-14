@@ -4,8 +4,11 @@ import urllib.request
 import ssl
 import json
 import shutil
+import logging
 from bro_sync.tree_data import RemoteTreeDataManager
 from bro_sync.ctx import Ctx
+
+log = logging.getLogger("bro-sync")
 
 
 class DiffActionAgent:
@@ -46,8 +49,8 @@ class DiffActionAgent:
         local_folder_set = item_tuple[0]
         local_file_set = item_tuple[1]
 
-        # print(json.dumps(local_folder_set, indent=4, ensure_ascii=False))  # for debug only
-        # print(json.dumps(local_file_set, indent=4, ensure_ascii=False))  # for debug only
+        # log.debug(json.dumps(local_folder_set, indent=4, ensure_ascii=False))  # for debug only
+        # log.debug(json.dumps(local_file_set, indent=4, ensure_ascii=False))  # for debug only
 
         rtd_current = rtdm.getCurrentTreeDataRemote()
         remote_folder_set = rtd_current["folder_set"]
@@ -61,23 +64,23 @@ class DiffActionAgent:
         deff_file_set = local_file_set.keys() - remote_file_dict.keys()
         file_paths_need_to_del.extend(deff_file_set)
 
-        print("----------")
-        print("folder_paths_need_to_del")
-        print("----------")
-        print(json.dumps(folder_paths_need_to_del, indent=4, ensure_ascii=False))  # for debug only
+        log.debug("----------")
+        log.debug("folder_paths_need_to_del")
+        log.debug("----------")
+        log.debug(json.dumps(folder_paths_need_to_del, indent=4, ensure_ascii=False))  # for debug only
 
-        print()
-        print("----------")
-        print("file_paths_need_to_del")
-        print("----------")
-        print(json.dumps(file_paths_need_to_del, indent=4, ensure_ascii=False))  # for debug only
-        print()
+        log.debug("")
+        log.debug("----------")
+        log.debug("file_paths_need_to_del")
+        log.debug("----------")
+        log.debug(json.dumps(file_paths_need_to_del, indent=4, ensure_ascii=False))  # for debug only
+        log.debug("")
 
         for to_del_rel_path in folder_paths_need_to_del:
             to_del_abs_path = os.path.join(rtdm.WORK_DIR_ABS_PATH_STR, to_del_rel_path)
             try:
                 shutil.rmtree(to_del_abs_path)
-                print("[DEBUG] rmtree: [" + to_del_abs_path + "]")
+                log.debug("[DEBUG] rmtree: [" + to_del_abs_path + "]")
             except:
                 pass
 
@@ -85,7 +88,7 @@ class DiffActionAgent:
             to_del_abs_path = os.path.join(rtdm.WORK_DIR_ABS_PATH_STR, to_del_rel_path)
             try:
                 os.remove(to_del_abs_path)
-                print("[DEBUG] rm file: [" + to_del_abs_path + "]")
+                log.debug("[DEBUG] rm file: [" + to_del_abs_path + "]")
             except:
                 pass
 
@@ -133,7 +136,7 @@ class DiffActionAgent:
                 try:
                     DiffActionAgent._createFileByCopy(rtdm, fileRelPath, same_file_rel_path_previous)
                 except Exception as e:
-                    print("[WARN] copy file exception. e: [" + str(e) + "]")
+                    log.debug("[WARN] copy file exception. e: [" + str(e) + "]")
                     DiffActionAgent._createFileByDownload(rtdm, fileRelPath)
             else:
                 DiffActionAgent._createFileByDownload(rtdm, fileRelPath)
@@ -146,10 +149,10 @@ class DiffActionAgent:
         directLinkRelPath = urllib.parse.quote(directLinkRelPath)  # url percent-encoding
 
         download_link = direct_link + "/" + directLinkRelPath
-        print("[DEBUG] download_link: [" + download_link + "]")
+        log.debug("[DEBUG] download_link: [" + download_link + "]")
 
         file_abs_path = os.path.join(rtdm.WORK_DIR_ABS_PATH_STR, fileRelPath)
-        # print("[DEBUG] download file_abs_path: [" + file_abs_path + "]")
+        # log.debug("[DEBUG] download file_abs_path: [" + file_abs_path + "]")
 
         if Ctx.CLOSE_SSL_CERT_VERIFY:
             ssl._create_default_https_context = ssl._create_unverified_context
@@ -163,7 +166,7 @@ class DiffActionAgent:
         folder_paths_need_to_make = diffListForAction[0]
         for folderRelPath in folder_paths_need_to_make:
             absPath = os.path.join(rtdm.WORK_DIR_ABS_PATH_STR, folderRelPath)
-            print("[DEBUG] mkdir -p: [" + absPath + "]")
+            log.debug("[DEBUG] mkdir -p: [" + absPath + "]")
             os.makedirs(absPath, exist_ok=True)
 
     @staticmethod
@@ -171,11 +174,11 @@ class DiffActionAgent:
         src_file_abs_path = os.path.join(rtdm.WORK_DIR_ABS_PATH_STR, same_file_rel_path_previous)
         dest_file_abs_path = os.path.join(rtdm.WORK_DIR_ABS_PATH_STR, fileRelPath)
         shutil.copy2(src_file_abs_path, dest_file_abs_path)
-        print("[DEBUG] copy file, from [" + same_file_rel_path_previous + "], to [" + fileRelPath + "]")
+        log.debug("[DEBUG] copy file, from [" + same_file_rel_path_previous + "], to [" + fileRelPath + "]")
 
     # @staticmethod
     # def _createFileByMove(rtdm, fileRelPath, same_file_rel_path_previous):
     #     src_file_abs_path = os.path.join(rtdm.WORK_DIR_ABS_PATH_STR, same_file_rel_path_previous)
     #     dest_file_abs_path = os.path.join(rtdm.WORK_DIR_ABS_PATH_STR, fileRelPath)
     #     shutil.move(src_file_abs_path, dest_file_abs_path)
-    #     print("[DEBUG] move file, from [" + same_file_rel_path_previous + "], to [" + fileRelPath + "]")
+    #     log.debug("[DEBUG] move file, from [" + same_file_rel_path_previous + "], to [" + fileRelPath + "]")

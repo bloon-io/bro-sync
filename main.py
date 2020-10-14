@@ -3,10 +3,16 @@ import json
 import sys
 import textwrap
 import argparse
+import logging
 from argparse import RawTextHelpFormatter
 from bro_sync.tree_data import RemoteTreeDataManager
 from bro_sync.action import DiffActionAgent
 from bro_sync.sync import BroSync
+
+
+log = logging.getLogger("bro-sync")
+log.setLevel(logging.DEBUG)
+log.addHandler(logging.StreamHandler())
 
 
 class Main:
@@ -33,6 +39,7 @@ class Main:
 
         # --------------------------------------------------
         broSync = BroSync(args.SHARE_ID, args.WORK_DIR)
+        # log.setLevel(logging.WARN)
         if args.service:
             await broSync.start_sync_service_async()
         else:
