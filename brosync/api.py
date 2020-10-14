@@ -1,6 +1,7 @@
 import json
 import inspect
 
+
 class WssApiCaller:
 
     def __init__(self, wss):

@@ -1,8 +1,9 @@
 
 import asyncio
 import json
-from RemoteTreeDataManager import RemoteTreeDataManager
-from DiffActionAgent import DiffActionAgent
+from brosync.tree_data import RemoteTreeDataManager
+from brosync.action import DiffActionAgent
+
 
 class BroSync:
 
@@ -11,7 +12,7 @@ class BroSync:
         self.workDir = workDir
 
     async def syncOnce_async(self):
-        
+
         rtdm = RemoteTreeDataManager(self.workDir, self.shareID)
 
         # --------------------------------------------------

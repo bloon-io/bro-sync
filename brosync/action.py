@@ -2,10 +2,10 @@ import asyncio
 import os
 import urllib.request
 import ssl
-from RemoteTreeDataManager import RemoteTreeDataManager
-from Ctx import Ctx
 import json
 import shutil
+from brosync.tree_data import RemoteTreeDataManager
+from brosync.ctx import Ctx
 
 
 class DiffActionAgent:

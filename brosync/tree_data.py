@@ -8,9 +8,9 @@ import inspect
 import os
 import base64
 import copy
-from WssApiCaller import WssApiCaller
 from sqlitedict import SqliteDict
-from Ctx import Ctx
+from brosync.api import WssApiCaller
+from brosync.ctx import Ctx
 
 
 class RemoteTreeDataManager:
@@ -39,6 +39,7 @@ class RemoteTreeDataManager:
     Simple getter/setter def. START
     ==================================================
     """
+
     def getWorkDir(self):
         return self.WORK_DIR_ABS_PATH_STR
 
@@ -264,7 +265,3 @@ class RemoteTreeDataManager:
                     chC_localRelPath = localRelPath + "/" + chC_name
 
                 treeData["file_dict"][chC_localRelPath] = (chC_version, chC_checksum_str)
-
-    
-            
-
