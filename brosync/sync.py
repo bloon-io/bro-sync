@@ -11,7 +11,7 @@ class BroSync:
         self.shareID = shareID
         self.workDir = workDir
 
-    async def syncOnce_async(self):
+    async def sync_once_async(self):
 
         rtdm = RemoteTreeDataManager(self.workDir, self.shareID)
 

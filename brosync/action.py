@@ -18,16 +18,16 @@ class DiffActionAgent:
         rtdm is RemoteTreeDataManager obj.
         """
         # to creat all folders in diff. list
-        DiffActionAgent.__createFoldersByDiff(rtdm)
+        DiffActionAgent._createFoldersByDiff(rtdm)
 
         # to download all files in diff. list
-        DiffActionAgent.__createFilesByDiff(rtdm)
+        DiffActionAgent._createFilesByDiff(rtdm)
 
         # to compare local tree and del garbage files & folders
-        DiffActionAgent.__deleteItemsByLocalDiffWithRemote(rtdm)
+        DiffActionAgent._deleteItemsByLocalDiffWithRemote(rtdm)
 
     @staticmethod
-    def __create_checksumRevIdxDict(treeData):
+    def _create_checksumRevIdxDict(treeData):
         if not treeData:
             return {}
 
@@ -40,9 +40,9 @@ class DiffActionAgent:
         return crid
 
     @staticmethod
-    def __deleteItemsByLocalDiffWithRemote(rtdm):
+    def _deleteItemsByLocalDiffWithRemote(rtdm):
 
-        item_tuple = DiffActionAgent.__createLocalItemSet(rtdm)
+        item_tuple = DiffActionAgent._createLocalItemSet(rtdm)
         local_folder_set = item_tuple[0]
         local_file_set = item_tuple[1]
 
@@ -90,7 +90,7 @@ class DiffActionAgent:
                 pass
 
     @staticmethod
-    def __createLocalItemSet(rtdm):
+    def _createLocalItemSet(rtdm):
         """
         return a tuple: (folder_set, file_set)
         """
@@ -118,9 +118,9 @@ class DiffActionAgent:
         return (folder_set, file_set)
 
     @staticmethod
-    def __createFilesByDiff(rtdm):
+    def _createFilesByDiff(rtdm):
         current_file_dict = rtdm.getCurrentTreeDataRemote()["file_dict"]
-        crid_previous = DiffActionAgent.__create_checksumRevIdxDict(rtdm.getPreviousTreeDataRemote())  # crid: Checksum Reversed Idx Dict
+        crid_previous = DiffActionAgent._create_checksumRevIdxDict(rtdm.getPreviousTreeDataRemote())  # crid: Checksum Reversed Idx Dict
 
         # diffListForAction is a tuple: (folder_paths_need_to_make, file_paths_need_to_download)
         diffListForAction = rtdm.getDiffForAction()
@@ -131,15 +131,15 @@ class DiffActionAgent:
             same_file_rel_path_previous = crid_previous.get(checksum)
             if same_file_rel_path_previous:
                 try:
-                    DiffActionAgent.__createFileByCopy(rtdm, fileRelPath, same_file_rel_path_previous)
+                    DiffActionAgent._createFileByCopy(rtdm, fileRelPath, same_file_rel_path_previous)
                 except Exception as e:
                     print("[WARN] copy file exception. e: [" + str(e) + "]")
-                    DiffActionAgent.__createFileByDownload(rtdm, fileRelPath)
+                    DiffActionAgent._createFileByDownload(rtdm, fileRelPath)
             else:
-                DiffActionAgent.__createFileByDownload(rtdm, fileRelPath)
+                DiffActionAgent._createFileByDownload(rtdm, fileRelPath)
 
     @staticmethod
-    def __createFileByDownload(rtdm, fileRelPath):
+    def _createFileByDownload(rtdm, fileRelPath):
         direct_link = Ctx.BLOON_DIRECT_LINK_URL_BASE + "/" + rtdm.SHARE_ID
         bloon_name = rtdm.getCurrentTreeDataRemote()["ctx"]["bloon_name"]
         directLinkRelPath = fileRelPath[len(bloon_name) + 1:]  # remove leading bloon name, "+1" is for char "/"
@@ -157,7 +157,7 @@ class DiffActionAgent:
         urllib.request.urlretrieve(download_link, file_abs_path)
 
     @staticmethod
-    def __createFoldersByDiff(rtdm):
+    def _createFoldersByDiff(rtdm):
         # diffListForAction is a tuple: (folder_paths_need_to_make, file_paths_need_to_download)
         diffListForAction = rtdm.getDiffForAction()
         folder_paths_need_to_make = diffListForAction[0]
@@ -167,14 +167,14 @@ class DiffActionAgent:
             os.makedirs(absPath, exist_ok=True)
 
     @staticmethod
-    def __createFileByCopy(rtdm, fileRelPath, same_file_rel_path_previous):
+    def _createFileByCopy(rtdm, fileRelPath, same_file_rel_path_previous):
         src_file_abs_path = os.path.join(rtdm.WORK_DIR_ABS_PATH_STR, same_file_rel_path_previous)
         dest_file_abs_path = os.path.join(rtdm.WORK_DIR_ABS_PATH_STR, fileRelPath)
         shutil.copy2(src_file_abs_path, dest_file_abs_path)
         print("[DEBUG] copy file, from [" + same_file_rel_path_previous + "], to [" + fileRelPath + "]")
 
     # @staticmethod
-    # def __createFileByMove(rtdm, fileRelPath, same_file_rel_path_previous):
+    # def _createFileByMove(rtdm, fileRelPath, same_file_rel_path_previous):
     #     src_file_abs_path = os.path.join(rtdm.WORK_DIR_ABS_PATH_STR, same_file_rel_path_previous)
     #     dest_file_abs_path = os.path.join(rtdm.WORK_DIR_ABS_PATH_STR, fileRelPath)
     #     shutil.move(src_file_abs_path, dest_file_abs_path)

@@ -12,15 +12,15 @@ class WssApiCaller:
     is for getting current function name (by using reflaction) and then remove the end string "_async".
     """
     async def getCard_async(self, params):
-        return await self.__wssCall_async(inspect.getframeinfo(inspect.currentframe()).function[:-6], params)
+        return await self._wssCall_async(inspect.getframeinfo(inspect.currentframe()).function[:-6], params)
 
     async def getFolder_async(self, params):
-        return await self.__wssCall_async(inspect.getframeinfo(inspect.currentframe()).function[:-6], params)
+        return await self._wssCall_async(inspect.getframeinfo(inspect.currentframe()).function[:-6], params)
 
     async def getShareInfo_async(self, params):
-        return await self.__wssCall_async(inspect.getframeinfo(inspect.currentframe()).function[:-6], params)
+        return await self._wssCall_async(inspect.getframeinfo(inspect.currentframe()).function[:-6], params)
 
-    async def __wssCall_async(self, funcName, params):
+    async def _wssCall_async(self, funcName, params):
         params["token"] = None
         inData = {
             "func_name": funcName, "cbID": "",

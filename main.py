@@ -24,7 +24,7 @@ class Main:
         # workDir = "C:\\Users\\patwang\\Desktop\\"  # HW NBNO3, HW TOPNO3
 
         broSync = BroSync(shareID, workDir)
-        await broSync.syncOnce_async()
+        await broSync.sync_once_async()
 
 if __name__ == "__main__":
     asyncio.get_event_loop().run_until_complete(Main().main())

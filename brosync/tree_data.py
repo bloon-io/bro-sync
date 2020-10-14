@@ -21,18 +21,18 @@ class RemoteTreeDataManager:
         self.WORK_DIR_ABS_PATH_STR = os.path.abspath(workDir)
         self.SHARE_ID = shareID
 
-        self.__bloonRootDir = None
-        self.__broSyncDbFileAbsPath = None
-        self.__treeData_remote_current = None
-        self.__treeData_remote_previous = None
-        self.__folders_and_files_diff_list_for_action = None
+        self._bloonRootDir = None
+        self._broSyncDbFileAbsPath = None
+        self._treeData_remote_current = None
+        self._treeData_remote_previous = None
+        self._folders_and_files_diff_list_for_action = None
 
-        self.__apiUrl = Ctx.BLOON_ADJ_API_WSS_URL
+        self._apiUrl = Ctx.BLOON_ADJ_API_WSS_URL
 
-        self.__ssl_context = ssl.SSLContext(ssl.PROTOCOL_TLS_CLIENT)
+        self._ssl_context = ssl.SSLContext(ssl.PROTOCOL_TLS_CLIENT)
         if Ctx.CLOSE_SSL_CERT_VERIFY:
-            self.__ssl_context.check_hostname = False  # for test only
-            self.__ssl_context.verify_mode = ssl.CERT_NONE  # for test only
+            self._ssl_context.check_hostname = False  # for test only
+            self._ssl_context.verify_mode = ssl.CERT_NONE  # for test only
 
     """
     ==================================================
@@ -44,22 +44,22 @@ class RemoteTreeDataManager:
         return self.WORK_DIR_ABS_PATH_STR
 
     def getBloonRootDir(self):
-        return self.__bloonRootDir
+        return self._bloonRootDir
 
     def getCurrentTreeDataRemote(self):
-        return self.__treeData_remote_current
+        return self._treeData_remote_current
 
     def getPreviousTreeDataRemote(self):
         """
         Return None if no data stored or any kind of err. 
         """
-        return self.__treeData_remote_previous
+        return self._treeData_remote_previous
 
     def getDiffForAction(self):
         """
         return a tuple: (folder_paths_need_to_make, file_paths_need_to_download)
         """
-        return self.__folders_and_files_diff_list_for_action
+        return self._folders_and_files_diff_list_for_action
 
     """
     ==================================================
@@ -68,27 +68,27 @@ class RemoteTreeDataManager:
     """
 
     def storeCurrentAsPrevious(self):
-        if self.__bloonRootDir is None:
+        if self._bloonRootDir is None:
             print("[INFO] Please call retrieveCurrentRemoteTreeData_async() first.")
         else:
-            with SqliteDict(self.__broSyncDbFileAbsPath, tablename="ctx") as ctx_db:
+            with SqliteDict(self._broSyncDbFileAbsPath, tablename="ctx") as ctx_db:
                 ctx_db.clear()
-                ctx = self.__treeData_remote_current["ctx"]
+                ctx = self._treeData_remote_current["ctx"]
                 for tmpKey in ctx:
                     tmpVal = ctx[tmpKey]
                     ctx_db[tmpKey] = tmpVal
                 ctx_db.commit()
 
-            with SqliteDict(self.__broSyncDbFileAbsPath, tablename="folder_set") as folder_set_db:
+            with SqliteDict(self._broSyncDbFileAbsPath, tablename="folder_set") as folder_set_db:
                 folder_set_db.clear()
-                folder_set = self.__treeData_remote_current["folder_set"]
+                folder_set = self._treeData_remote_current["folder_set"]
                 for tmpKey in folder_set:
                     folder_set_db[tmpKey] = None
                 folder_set_db.commit()
 
-            with SqliteDict(self.__broSyncDbFileAbsPath, tablename="file_dict") as file_dict_db:
+            with SqliteDict(self._broSyncDbFileAbsPath, tablename="file_dict") as file_dict_db:
                 file_dict_db.clear()
-                file_dict = self.__treeData_remote_current["file_dict"]
+                file_dict = self._treeData_remote_current["file_dict"]
                 for tmpKey in file_dict:
                     tmpVal = file_dict[tmpKey]
                     file_dict_db[tmpKey] = tmpVal
@@ -101,8 +101,8 @@ class RemoteTreeDataManager:
         # --------------------------------------------------
         # for folders
         # --------------------------------------------------
-        folder_set__current = self.__treeData_remote_current["folder_set"]
-        folder_set__previous = {} if self.__treeData_remote_previous is None else self.__treeData_remote_previous["folder_set"]
+        folder_set__current = self._treeData_remote_current["folder_set"]
+        folder_set__previous = {} if self._treeData_remote_previous is None else self._treeData_remote_previous["folder_set"]
 
         # all new file path need to download
         deff_folder_set = folder_set__current.keys() - folder_set__previous.keys()
@@ -111,8 +111,8 @@ class RemoteTreeDataManager:
         # --------------------------------------------------
         # for files
         # --------------------------------------------------
-        file_dict__current = self.__treeData_remote_current["file_dict"]
-        file_dict__previous = {} if self.__treeData_remote_previous is None else self.__treeData_remote_previous["file_dict"]
+        file_dict__current = self._treeData_remote_current["file_dict"]
+        file_dict__previous = {} if self._treeData_remote_previous is None else self._treeData_remote_previous["file_dict"]
 
         # all new file path need to download
         deff_file_set = file_dict__current.keys() - file_dict__previous.keys()
@@ -129,38 +129,38 @@ class RemoteTreeDataManager:
         # print("folder_paths_need_to_make: " + str(folder_paths_need_to_make))
         # print("file_paths_need_to_download: " + str(file_paths_need_to_download))
 
-        self.__folders_and_files_diff_list_for_action = (folder_paths_need_to_make, file_paths_need_to_download)
+        self._folders_and_files_diff_list_for_action = (folder_paths_need_to_make, file_paths_need_to_download)
 
     def loadPreviousTreeDataRemote(self):
-        if self.__bloonRootDir is None:
+        if self._bloonRootDir is None:
             print("[INFO] Please call retrieveCurrentRemoteTreeData_async() first.")
         else:
-            if not os.path.exists(self.__broSyncDbFileAbsPath):
+            if not os.path.exists(self._broSyncDbFileAbsPath):
                 return None
 
             treeData = {}
 
-            with SqliteDict(self.__broSyncDbFileAbsPath, tablename="ctx") as ctx_db:
+            with SqliteDict(self._broSyncDbFileAbsPath, tablename="ctx") as ctx_db:
                 ctx_mem = {}
                 for tmpKey in ctx_db:
                     tmpVal = ctx_db[tmpKey]
                     ctx_mem[tmpKey] = tmpVal
                 treeData["ctx"] = ctx_mem
 
-            with SqliteDict(self.__broSyncDbFileAbsPath, tablename="folder_set") as folder_set_db:
+            with SqliteDict(self._broSyncDbFileAbsPath, tablename="folder_set") as folder_set_db:
                 folder_set_mem = {}
                 for tmpKey in folder_set_db:
                     folder_set_mem[tmpKey] = None
                 treeData["folder_set"] = folder_set_mem
 
-            with SqliteDict(self.__broSyncDbFileAbsPath, tablename="file_dict") as file_dict_db:
+            with SqliteDict(self._broSyncDbFileAbsPath, tablename="file_dict") as file_dict_db:
                 file_dict_mem = {}
                 for tmpKey in file_dict_db:
                     tmpVal = file_dict_db[tmpKey]
                     file_dict_mem[tmpKey] = tmpVal
                 treeData["file_dict"] = file_dict_mem
 
-            self.__treeData_remote_previous = treeData
+            self._treeData_remote_previous = treeData
 
     async def retrieveCurrentRemoteTreeData_async(self):
 
@@ -175,7 +175,7 @@ class RemoteTreeDataManager:
             "file_dict": {}
         }
 
-        async with websockets.connect(self.__apiUrl, ssl=self.__ssl_context, max_size=RemoteTreeDataManager.WSS_CLIENT_PAYLOAD_MAX_SIZE) as wss:
+        async with websockets.connect(self._apiUrl, ssl=self._ssl_context, max_size=RemoteTreeDataManager.WSS_CLIENT_PAYLOAD_MAX_SIZE) as wss:
             api = WssApiCaller(wss)
             outData = await api.getShareInfo_async({"shareID": self.SHARE_ID})
             shareData = outData["data"]["shareData"]
@@ -197,13 +197,13 @@ class RemoteTreeDataManager:
                     root_localRelPath = name
                     treeData["folder_set"][root_localRelPath] = None
 
-                    self.__bloonRootDir = os.path.join(self.WORK_DIR_ABS_PATH_STR, root_localRelPath)
-                    print("[DEBUG] __bloonRootDir: [" + self.__bloonRootDir + "]")
+                    self._bloonRootDir = os.path.join(self.WORK_DIR_ABS_PATH_STR, root_localRelPath)
+                    print("[DEBUG] __bloonRootDir: [" + self._bloonRootDir + "]")
 
-                    self.__broSyncDbFileAbsPath = os.path.join(self.WORK_DIR_ABS_PATH_STR, Ctx.DB_FILE_NAME)
-                    print("[DEBUG] __broSyncDbFileAbsPath: [" + self.__broSyncDbFileAbsPath + "]")
+                    self._broSyncDbFileAbsPath = os.path.join(self.WORK_DIR_ABS_PATH_STR, Ctx.DB_FILE_NAME)
+                    print("[DEBUG] __broSyncDbFileAbsPath: [" + self._broSyncDbFileAbsPath + "]")
 
-                    self.__handle_childFiles(root_localRelPath, childCards, treeData)
+                    self._handle_childFiles(root_localRelPath, childCards, treeData)
 
                     for childFolder in childFolders:
                         chF_isRecycled = childFolder["isRecycled"]
@@ -211,7 +211,7 @@ class RemoteTreeDataManager:
                             chF_name = childFolder["name"]
                             chF_folderID = childFolder["folderID"]
                             chF_localRelPath = root_localRelPath + "/" + chF_name
-                            await self.__getChildFolderRecursiveUnit_async(api, self.SHARE_ID, chF_folderID, chF_localRelPath, treeData)
+                            await self._getChildFolderRecursiveUnit_async(api, self.SHARE_ID, chF_folderID, chF_localRelPath, treeData)
 
             else:
                 """
@@ -222,10 +222,10 @@ class RemoteTreeDataManager:
                 # print(outData)
                 print("[INFO] This sharelink is not a folder.")
 
-        self.__treeData_remote_current = treeData
+        self._treeData_remote_current = treeData
 
     @staticmethod
-    async def __getChildFolderRecursiveUnit_async(api, shareID, folderID, localRelPath, treeData):
+    async def _getChildFolderRecursiveUnit_async(api, shareID, folderID, localRelPath, treeData):
 
         treeData["folder_set"][localRelPath] = None
 
@@ -237,7 +237,7 @@ class RemoteTreeDataManager:
             childCards = outData["childCards"]
             childFolders = outData["childFolders"]
 
-        RemoteTreeDataManager.__handle_childFiles(localRelPath, childCards, treeData)
+        RemoteTreeDataManager._handle_childFiles(localRelPath, childCards, treeData)
 
         for childFolder in childFolders:
             chF_isRecycled = childFolder["isRecycled"]
@@ -245,10 +245,10 @@ class RemoteTreeDataManager:
                 chF_name = childFolder["name"]
                 chF_folderID = childFolder["folderID"]
                 chF_localRelPath = localRelPath + "/" + chF_name
-                await RemoteTreeDataManager.__getChildFolderRecursiveUnit_async(api, shareID, chF_folderID, chF_localRelPath, treeData)
+                await RemoteTreeDataManager._getChildFolderRecursiveUnit_async(api, shareID, chF_folderID, chF_localRelPath, treeData)
 
     @staticmethod
-    def __handle_childFiles(localRelPath, childCards, treeData):
+    def _handle_childFiles(localRelPath, childCards, treeData):
 
         for childCard in childCards:
             chC_isRecycled = childCard["isRecycled"]
