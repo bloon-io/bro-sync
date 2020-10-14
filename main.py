@@ -2,9 +2,9 @@ import asyncio
 import json
 import sys
 import textwrap
-from brosync.tree_data import RemoteTreeDataManager
-from brosync.action import DiffActionAgent
-from brosync.sync import BroSync
+from bro_sync.tree_data import RemoteTreeDataManager
+from bro_sync.action import DiffActionAgent
+from bro_sync.sync import BroSync
 
 
 class Main:
@@ -28,6 +28,8 @@ class Main:
                 How to get a shearlink? See https://www.bloon.io/help/sharelinks
                 """))
             return
+
+        # --------------------------------------------------
         broSync = BroSync(shareId, workDir)
         await broSync.sync_once_async()
 

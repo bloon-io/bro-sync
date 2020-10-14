@@ -4,8 +4,8 @@ import urllib.request
 import ssl
 import json
 import shutil
-from brosync.tree_data import RemoteTreeDataManager
-from brosync.ctx import Ctx
+from bro_sync.tree_data import RemoteTreeDataManager
+from bro_sync.ctx import Ctx
 
 
 class DiffActionAgent:

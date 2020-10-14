@@ -1,8 +1,8 @@
 
 import asyncio
 import json
-from brosync.tree_data import RemoteTreeDataManager
-from brosync.action import DiffActionAgent
+from bro_sync.tree_data import RemoteTreeDataManager
+from bro_sync.action import DiffActionAgent
 
 
 class BroSync:

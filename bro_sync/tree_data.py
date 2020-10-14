@@ -9,8 +9,8 @@ import os
 import base64
 import copy
 from sqlitedict import SqliteDict
-from brosync.api import WssApiCaller
-from brosync.ctx import Ctx
+from bro_sync.api import WssApiCaller
+from bro_sync.ctx import Ctx
 
 
 class RemoteTreeDataManager:
