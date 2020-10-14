@@ -1,30 +1,36 @@
 import asyncio
 import json
+import sys
+import textwrap
 from brosync.tree_data import RemoteTreeDataManager
 from brosync.action import DiffActionAgent
 from brosync.sync import BroSync
 
 
-
 class Main:
 
-    # TODO manage log (make DEBUG closable)
-
-    # TODO impl. BroSync.start_sync_service
-
-    # TODO test in linux env.
-
-    # TODO write README
+    SHARE_ID = None
+    WORK_DIR = None
 
     async def main(self):
-        shareID = "klUReHe5"  # test data HW TOPNO2
-        # shareID = "OXrq5h3g"  # test data HW TOPNO3
-        # shareID = "WjCz6B10"  # test data HW NBNO3
-        workDir = "C:\\Users\\patwnag\\Desktop\\" # HW TOPNO2
-        # workDir = "C:\\Users\\patwang\\Desktop\\"  # HW NBNO3, HW TOPNO3
+        shareId = sys.argv[1] if len(sys.argv) >= 2 else Main.SHARE_ID
+        workDir = sys.argv[2] if len(sys.argv) >= 3 else Main.WORK_DIR
 
-        broSync = BroSync(shareID, workDir)
+        if (not shareId) or (not workDir):
+            print(textwrap.dedent("""
+                Usage: python main.py SHARE_ID WORK_DIR
+                SHARE_ID is a BLOON sharelink ID of your folder.
+                WORK_DIR is the place you want to put your sync. folder.
+
+                The following line shows how to get an ID from a sharelink:
+                https://www.bloon.io/share/[a sharelink ID]/
+
+                How to get a shearlink? See https://www.bloon.io/help/sharelinks
+                """))
+            return
+        broSync = BroSync(shareId, workDir)
         await broSync.sync_once_async()
+
 
 if __name__ == "__main__":
     asyncio.get_event_loop().run_until_complete(Main().main())
