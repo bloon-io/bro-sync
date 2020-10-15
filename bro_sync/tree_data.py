@@ -186,19 +186,32 @@ class RemoteTreeDataManager:
             isFolder = shareData["isFolder"]
 
             if isFolder:
-                outAll = await api.getFoldersMin_async({"shareID": self.SHARE_ID, "folderIDs": [itemID]})
-                outData = outAll["data"]
-                folders = outData["folders"]
-                folder = folders[0]
+                await self._getChildFolderRecursiveUnit_async(api, self.SHARE_ID, [itemID], "", treeData)
 
-                # folderID = folder["folderID"] # it should be the same as "itemID"
-                name = folder["name"]
-                childCardIDs = folder["childCardIDs"]
-                childFolderIDs = folder["childFolderIDs"]
+            else:
+                """
+                It will enter this block only if item itself of this sharelink is not a folder.
+                """
+                # outAll = await api.getCard_async({"shareID": shareID, "cardID": itemID})
+                # outData = outAll["data"]
+                # log.debug(outData)
+                log.info("This sharelink is not a folder.")
 
+        self._treeData_remote_current = treeData
+
+    async def _getChildFolderRecursiveUnit_async(self, api, shareID, folderIDs, localRelPath, treeData):
+
+        outAll = await api.getFoldersMin_async({"shareID": shareID, "folderIDs": folderIDs})
+        outFolders = outAll["data"]["folders"]
+        for folder in outFolders:
+            name = folder["name"]
+            childCards = []
+            childRelPath = ""
+
+            if not localRelPath:
+                # mean it is root
                 treeData["ctx"]["bloon_name"] = name
                 root_localRelPath = name
-                treeData["folder_set"][root_localRelPath] = None
 
                 self._bloonRootDir = os.path.join(self.WORK_DIR_ABS_PATH_STR, root_localRelPath)
                 log.debug("_bloonRootDir: [" + self._bloonRootDir + "]")
@@ -206,50 +219,20 @@ class RemoteTreeDataManager:
                 self._broSyncDbFileAbsPath = os.path.join(self.WORK_DIR_ABS_PATH_STR, Ctx.DB_FILE_NAME)
                 log.debug("_broSyncDbFileAbsPath: [" + self._broSyncDbFileAbsPath + "]")
 
-                outAll_getCardsMin = await api.getCardsMin_async({"shareID": self.SHARE_ID, "cardIDs": [childCardIDs]})
-                childCards = outAll_getCardsMin["data"]["cards"]
-                self._handle_childFiles(root_localRelPath, childCards, treeData)
-
-                outAll_getFoldersMin = await api.getFoldersMin_async({"shareID": self.SHARE_ID, "folderIDs": [childFolderIDs]})
-                childFolders = outAll_getFoldersMin["data"]["folders"]
-                for childFolder in childFolders:
-                    chF_name = childFolder["name"]
-                    chF_folderID = childFolder["folderID"]
-                    chF_localRelPath = root_localRelPath + "/" + chF_name
-                    await self._getChildFolderRecursiveUnit_async(api, self.SHARE_ID, chF_folderID, chF_localRelPath, treeData)
-
+                childRelPath = root_localRelPath
             else:
-                """
-                It will enter this block only if item itself of this sharelink is not a folder.
-                """
-                log.info("This sharelink is not a folder.")
+                childRelPath = localRelPath + "/" + name
+                
+            treeData["folder_set"][childRelPath] = None
 
-        self._treeData_remote_current = treeData
+            if len(folder["childCardIDs"]) > 0:
+                childOutAll = await api.getCardsMin_async({"shareID": shareID, "cardIDs": folder["childCardIDs"]})
+                childCards = childOutAll["data"]["cards"]
+                    
+            self._handle_childFiles(childRelPath, childCards, treeData)
 
-    @staticmethod
-    async def _getChildFolderRecursiveUnit_async(api, shareID, folderID, localRelPath, treeData):
-
-        treeData["folder_set"][localRelPath] = None
-        outAll = await api.getFoldersMin_async({"shareID": shareID, "folderIDs": [folderID]})
-        outData = outAll["data"]
-        folders = outData["folders"]
-        folder = folders[0]
-
-        # name = folder["name"] # no use for now
-        childCardIDs = folder["childCardIDs"]
-        childFolderIDs = folder["childFolderIDs"]
-
-        outAll_getCardsMin = await api.getCardsMin_async({"shareID": shareID, "cardIDs": childCardIDs})
-        childCards = outAll_getCardsMin["data"]["cards"]
-        RemoteTreeDataManager._handle_childFiles(localRelPath, childCards, treeData)
-
-        outAll_getFoldersMin = await api.getFoldersMin_async({"shareID": shareID, "folderIDs": childFolderIDs})
-        childFolders = outAll_getFoldersMin["data"]["folders"]
-        for childFolder in childFolders:
-            chF_name = childFolder["name"]
-            chF_folderID = childFolder["folderID"]
-            chF_localRelPath = localRelPath + "/" + chF_name
-            await RemoteTreeDataManager._getChildFolderRecursiveUnit_async(api, shareID, chF_folderID, chF_localRelPath, treeData)
+            if len(folder["childFolderIDs"]) > 0:
+                await self._getChildFolderRecursiveUnit_async(api, shareID, folder["childFolderIDs"], childRelPath, treeData)
 
     @staticmethod
     def _handle_childFiles(localRelPath, childCards, treeData):
