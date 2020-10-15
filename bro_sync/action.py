@@ -80,7 +80,7 @@ class DiffActionAgent:
             to_del_abs_path = os.path.join(rtdm.WORK_DIR_ABS_PATH_STR, to_del_rel_path)
             try:
                 shutil.rmtree(to_del_abs_path)
-                log.debug("[DEBUG] rmtree: [" + to_del_abs_path + "]")
+                log.info("[ACTION] rmtree: [" + to_del_abs_path + "]")
             except:
                 pass
 
@@ -88,7 +88,7 @@ class DiffActionAgent:
             to_del_abs_path = os.path.join(rtdm.WORK_DIR_ABS_PATH_STR, to_del_rel_path)
             try:
                 os.remove(to_del_abs_path)
-                log.debug("[DEBUG] rm file: [" + to_del_abs_path + "]")
+                log.info("[ACTION] rm file: [" + to_del_abs_path + "]")
             except:
                 pass
 
@@ -135,8 +135,8 @@ class DiffActionAgent:
             if same_file_rel_path_previous:
                 try:
                     DiffActionAgent._createFileByCopy(rtdm, fileRelPath, same_file_rel_path_previous)
-                except Exception as e:
-                    log.debug("[WARN] copy file exception. e: [" + str(e) + "]")
+                except BaseException as e:
+                    log.info("[IGNORABLE] copy file exception. e: [" + str(e) + "]")
                     DiffActionAgent._createFileByDownload(rtdm, fileRelPath)
             else:
                 DiffActionAgent._createFileByDownload(rtdm, fileRelPath)
@@ -149,10 +149,10 @@ class DiffActionAgent:
         directLinkRelPath = urllib.parse.quote(directLinkRelPath)  # url percent-encoding
 
         download_link = direct_link + "/" + directLinkRelPath
-        log.debug("[DEBUG] download_link: [" + download_link + "]")
+        log.info("[ACTION] download_link: [" + download_link + "]")
 
         file_abs_path = os.path.join(rtdm.WORK_DIR_ABS_PATH_STR, fileRelPath)
-        # log.debug("[DEBUG] download file_abs_path: [" + file_abs_path + "]")
+        # log.info("[ACTION] download file_abs_path: [" + file_abs_path + "]")
 
         if Ctx.CLOSE_SSL_CERT_VERIFY:
             ssl._create_default_https_context = ssl._create_unverified_context
@@ -166,7 +166,7 @@ class DiffActionAgent:
         folder_paths_need_to_make = diffListForAction[0]
         for folderRelPath in folder_paths_need_to_make:
             absPath = os.path.join(rtdm.WORK_DIR_ABS_PATH_STR, folderRelPath)
-            log.debug("[DEBUG] mkdir -p: [" + absPath + "]")
+            log.info("[ACTION] mkdir -p: [" + absPath + "]")
             os.makedirs(absPath, exist_ok=True)
 
     @staticmethod
@@ -174,11 +174,11 @@ class DiffActionAgent:
         src_file_abs_path = os.path.join(rtdm.WORK_DIR_ABS_PATH_STR, same_file_rel_path_previous)
         dest_file_abs_path = os.path.join(rtdm.WORK_DIR_ABS_PATH_STR, fileRelPath)
         shutil.copy2(src_file_abs_path, dest_file_abs_path)
-        log.debug("[DEBUG] copy file, from [" + same_file_rel_path_previous + "], to [" + fileRelPath + "]")
+        log.info("[ACTION] copy file, from [" + same_file_rel_path_previous + "], to [" + fileRelPath + "]")
 
     # @staticmethod
     # def _createFileByMove(rtdm, fileRelPath, same_file_rel_path_previous):
     #     src_file_abs_path = os.path.join(rtdm.WORK_DIR_ABS_PATH_STR, same_file_rel_path_previous)
     #     dest_file_abs_path = os.path.join(rtdm.WORK_DIR_ABS_PATH_STR, fileRelPath)
     #     shutil.move(src_file_abs_path, dest_file_abs_path)
-    #     log.debug("[DEBUG] move file, from [" + same_file_rel_path_previous + "], to [" + fileRelPath + "]")
+    #     log.info("[ACTION] move file, from [" + same_file_rel_path_previous + "], to [" + fileRelPath + "]")

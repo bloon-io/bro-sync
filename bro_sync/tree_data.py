@@ -72,7 +72,7 @@ class RemoteTreeDataManager:
 
     def storeCurrentAsPrevious(self):
         if self._bloonRootDir is None:
-            log.debug("[INFO] Please call retrieveCurrentRemoteTreeData_async() first.")
+            log.debug("call retrieveCurrentRemoteTreeData_async() first.")
         else:
             with SqliteDict(self._broSyncDbFileAbsPath, tablename="ctx") as ctx_db:
                 ctx_db.clear()
@@ -136,7 +136,7 @@ class RemoteTreeDataManager:
 
     def loadPreviousTreeDataRemote(self):
         if self._bloonRootDir is None:
-            log.debug("[INFO] Please call retrieveCurrentRemoteTreeData_async() first.")
+            log.debug("call retrieveCurrentRemoteTreeData_async() first.")
         else:
             if not os.path.exists(self._broSyncDbFileAbsPath):
                 return None
@@ -201,10 +201,10 @@ class RemoteTreeDataManager:
                     treeData["folder_set"][root_localRelPath] = None
 
                     self._bloonRootDir = os.path.join(self.WORK_DIR_ABS_PATH_STR, root_localRelPath)
-                    log.debug("[DEBUG] __bloonRootDir: [" + self._bloonRootDir + "]")
+                    log.debug("_bloonRootDir: [" + self._bloonRootDir + "]")
 
                     self._broSyncDbFileAbsPath = os.path.join(self.WORK_DIR_ABS_PATH_STR, Ctx.DB_FILE_NAME)
-                    log.debug("[DEBUG] __broSyncDbFileAbsPath: [" + self._broSyncDbFileAbsPath + "]")
+                    log.debug("_broSyncDbFileAbsPath: [" + self._broSyncDbFileAbsPath + "]")
 
                     self._handle_childFiles(root_localRelPath, childCards, treeData)
 
@@ -223,7 +223,7 @@ class RemoteTreeDataManager:
                 # outAll = await api.getCard_async({"shareID": shareID, "cardID": itemID})
                 # outData = outAll["data"]
                 # log.debug(outData)
-                log.debug("[INFO] This sharelink is not a folder.")
+                log.info("This sharelink is not a folder.")
 
         self._treeData_remote_current = treeData
 

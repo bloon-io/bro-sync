@@ -2,7 +2,7 @@
 class Ctx:
     CLOSE_SSL_CERT_VERIFY = True # for test only
 
-    SERVICE_SYNC_LOOP_INTERVAL = 30 # sec.
+    SERVICE_SYNC_LOOP_INTERVAL = 1 # sec.
 
     DB_FILE_NAME = ".bro-sync.db"
     BLOON_DIRECT_LINK_URL_BASE = "https://localhost:8443/Bloon_Blink/share"

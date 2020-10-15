@@ -11,7 +11,7 @@ from bro_sync.sync import BroSync
 
 
 log = logging.getLogger("bro-sync")
-log.setLevel(logging.DEBUG)
+log.setLevel(logging.INFO)
 log.addHandler(logging.StreamHandler())
 
 
