@@ -186,43 +186,42 @@ class RemoteTreeDataManager:
             isFolder = shareData["isFolder"]
 
             if isFolder:
-                outAll = await api.getFolder_async({"shareID": self.SHARE_ID, "folderID": itemID})
+                outAll = await api.getFoldersMin_async({"shareID": self.SHARE_ID, "folderIDs": [itemID]})
                 outData = outAll["data"]
+                folders = outData["folders"]
+                folder = folders[0]
 
-                isRecycled = outData["isRecycled"]
-                if not isRecycled:
-                    # folderID = outData["folderID"] # it should be the same as "itemID"
-                    name = outData["name"]
-                    childCards = outData["childCards"]
-                    childFolders = outData["childFolders"]
+                # folderID = folder["folderID"] # it should be the same as "itemID"
+                name = folder["name"]
+                childCardIDs = folder["childCardIDs"]
+                childFolderIDs = folder["childFolderIDs"]
 
-                    treeData["ctx"]["bloon_name"] = name
-                    root_localRelPath = name
-                    treeData["folder_set"][root_localRelPath] = None
+                treeData["ctx"]["bloon_name"] = name
+                root_localRelPath = name
+                treeData["folder_set"][root_localRelPath] = None
 
-                    self._bloonRootDir = os.path.join(self.WORK_DIR_ABS_PATH_STR, root_localRelPath)
-                    log.debug("_bloonRootDir: [" + self._bloonRootDir + "]")
+                self._bloonRootDir = os.path.join(self.WORK_DIR_ABS_PATH_STR, root_localRelPath)
+                log.debug("_bloonRootDir: [" + self._bloonRootDir + "]")
 
-                    self._broSyncDbFileAbsPath = os.path.join(self.WORK_DIR_ABS_PATH_STR, Ctx.DB_FILE_NAME)
-                    log.debug("_broSyncDbFileAbsPath: [" + self._broSyncDbFileAbsPath + "]")
+                self._broSyncDbFileAbsPath = os.path.join(self.WORK_DIR_ABS_PATH_STR, Ctx.DB_FILE_NAME)
+                log.debug("_broSyncDbFileAbsPath: [" + self._broSyncDbFileAbsPath + "]")
 
-                    self._handle_childFiles(root_localRelPath, childCards, treeData)
+                outAll_getCardsMin = await api.getCardsMin_async({"shareID": self.SHARE_ID, "cardIDs": [childCardIDs]})
+                childCards = outAll_getCardsMin["data"]["cards"]
+                self._handle_childFiles(root_localRelPath, childCards, treeData)
 
-                    for childFolder in childFolders:
-                        chF_isRecycled = childFolder["isRecycled"]
-                        if not chF_isRecycled:
-                            chF_name = childFolder["name"]
-                            chF_folderID = childFolder["folderID"]
-                            chF_localRelPath = root_localRelPath + "/" + chF_name
-                            await self._getChildFolderRecursiveUnit_async(api, self.SHARE_ID, chF_folderID, chF_localRelPath, treeData)
+                outAll_getFoldersMin = await api.getFoldersMin_async({"shareID": self.SHARE_ID, "folderIDs": [childFolderIDs]})
+                childFolders = outAll_getFoldersMin["data"]["folders"]
+                for childFolder in childFolders:
+                    chF_name = childFolder["name"]
+                    chF_folderID = childFolder["folderID"]
+                    chF_localRelPath = root_localRelPath + "/" + chF_name
+                    await self._getChildFolderRecursiveUnit_async(api, self.SHARE_ID, chF_folderID, chF_localRelPath, treeData)
 
             else:
                 """
                 It will enter this block only if item itself of this sharelink is not a folder.
                 """
-                # outAll = await api.getCard_async({"shareID": shareID, "cardID": itemID})
-                # outData = outAll["data"]
-                # log.debug(outData)
                 log.info("This sharelink is not a folder.")
 
         self._treeData_remote_current = treeData
@@ -231,40 +230,40 @@ class RemoteTreeDataManager:
     async def _getChildFolderRecursiveUnit_async(api, shareID, folderID, localRelPath, treeData):
 
         treeData["folder_set"][localRelPath] = None
-
-        outAll = await api.getFolder_async({"shareID": shareID, "folderID": folderID})
+        outAll = await api.getFoldersMin_async({"shareID": shareID, "folderIDs": [folderID]})
         outData = outAll["data"]
-        isRecycled = outData["isRecycled"]
-        if not isRecycled:
-            # name = outData["name"] # no use for now
-            childCards = outData["childCards"]
-            childFolders = outData["childFolders"]
+        folders = outData["folders"]
+        folder = folders[0]
 
+        # name = folder["name"] # no use for now
+        childCardIDs = folder["childCardIDs"]
+        childFolderIDs = folder["childFolderIDs"]
+
+        outAll_getCardsMin = await api.getCardsMin_async({"shareID": shareID, "cardIDs": childCardIDs})
+        childCards = outAll_getCardsMin["data"]["cards"]
         RemoteTreeDataManager._handle_childFiles(localRelPath, childCards, treeData)
 
+        outAll_getFoldersMin = await api.getFoldersMin_async({"shareID": shareID, "folderIDs": childFolderIDs})
+        childFolders = outAll_getFoldersMin["data"]["folders"]
         for childFolder in childFolders:
-            chF_isRecycled = childFolder["isRecycled"]
-            if not chF_isRecycled:
-                chF_name = childFolder["name"]
-                chF_folderID = childFolder["folderID"]
-                chF_localRelPath = localRelPath + "/" + chF_name
-                await RemoteTreeDataManager._getChildFolderRecursiveUnit_async(api, shareID, chF_folderID, chF_localRelPath, treeData)
+            chF_name = childFolder["name"]
+            chF_folderID = childFolder["folderID"]
+            chF_localRelPath = localRelPath + "/" + chF_name
+            await RemoteTreeDataManager._getChildFolderRecursiveUnit_async(api, shareID, chF_folderID, chF_localRelPath, treeData)
 
     @staticmethod
     def _handle_childFiles(localRelPath, childCards, treeData):
 
         for childCard in childCards:
-            chC_isRecycled = childCard["isRecycled"]
-            if not chC_isRecycled:
-                chC_name = childCard["name"]
-                chC_extension = childCard["extension"]
-                chC_version = childCard["version"]  # int
-                chC_checksum_b64str = childCard["checksum"]  # binary in base64 format string
-                chC_checksum_str = base64.b64decode(chC_checksum_b64str).decode("UTF-8")
+            chC_name = childCard["name"]
+            chC_extension = childCard["extension"]
+            chC_version = childCard["version"]  # int
+            chC_checksum_b64str = childCard["checksum"]  # binary in base64 format string
+            chC_checksum_str = base64.b64decode(chC_checksum_b64str).decode("UTF-8")
 
-                if chC_extension:
-                    chC_localRelPath = localRelPath + "/" + chC_name + "." + chC_extension
-                else:
-                    chC_localRelPath = localRelPath + "/" + chC_name
+            if chC_extension:
+                chC_localRelPath = localRelPath + "/" + chC_name + "." + chC_extension
+            else:
+                chC_localRelPath = localRelPath + "/" + chC_name
 
-                treeData["file_dict"][chC_localRelPath] = (chC_version, chC_checksum_str)
+            treeData["file_dict"][chC_localRelPath] = (chC_version, chC_checksum_str)

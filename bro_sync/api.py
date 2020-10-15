@@ -14,10 +14,10 @@ class WssApiCaller:
     The purpose of this code: "inspect.getframeinfo(inspect.currentframe()).function[:-6]"
     is for getting current function name (by using reflaction) and then remove the end string "_async".
     """
-    async def getCard_async(self, params):
+    async def getFoldersMin_async(self, params):
         return await self._wssCall_async(inspect.getframeinfo(inspect.currentframe()).function[:-6], params)
 
-    async def getFolder_async(self, params):
+    async def getCardsMin_async(self, params):
         return await self._wssCall_async(inspect.getframeinfo(inspect.currentframe()).function[:-6], params)
 
     async def getShareInfo_async(self, params):
