@@ -23,7 +23,7 @@ class Main:
     async def main(self):
 
         parser = argparse.ArgumentParser(description=textwrap.indent(textwrap.dedent("""
-                To synchronize folder you shared through a BLOON sharelink.
+                To synchronize a folder you shared through a BLOON sharelink.
 
                 The following line shows how to get an ID from a sharelink:
                 https://www.bloon.io/share/[a sharelink ID]/
@@ -35,11 +35,18 @@ class Main:
         parser.add_argument("SHARE_ID", type=str, help="A BLOON sharelink ID of your folder.")
         parser.add_argument("WORK_DIR", type=str, help="The place you want to put your sync. folder.")
         parser.add_argument("-s", "--service", action="store_true", default=False, help="start and keep syncing")
+        parser.add_argument("-q", "--quiet", action="store_true", default=False, help="run quietly, show nothing on screen")
+        parser.add_argument("--detail", action="store_true", default=False, help="show more details on screen")
         args = parser.parse_args()
 
         # --------------------------------------------------
         broSync = BroSync(args.SHARE_ID, args.WORK_DIR)
-        # log.setLevel(logging.WARN)
+
+        if args.quiet:
+            log.setLevel(logging.FATAL)
+        elif args.detail:
+            log.setLevel(logging.DEBUG)
+
         if args.service:
             await broSync.start_sync_service_async()
         else:

@@ -23,7 +23,7 @@ class BroSync:
         try:
             while True:
                 time_str = datetime.now().strftime("%Y-%m%d %H:%M:%S")
-                log.info("----- service loop @" + time_str + " -----")
+                log.info("----- service action @" + time_str + " -----")
                 await self.sync_once_async()
                 time.sleep(Ctx.SERVICE_SYNC_LOOP_INTERVAL)
         except BaseException as e:
