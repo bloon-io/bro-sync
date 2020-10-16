@@ -102,18 +102,22 @@ class DiffActionAgent:
 
         bloonRootDirStr = rtdm.getBloonRootDir()
         work_path_len = len(rtdm.WORK_DIR_ABS_PATH_STR) + 1  # +1 is for "/" in the end
-        walkData = os.walk(bloonRootDirStr)
-        for relRoot, dirs, files in walkData:
 
-            for name in dirs:
-                tmpAbsPath = os.path.join(relRoot, name)
-                tmpRelPath = tmpAbsPath[work_path_len:].replace("\\", "/")
-                folder_set[tmpRelPath] = None
+        try:
+            for relRoot, dirs, files in os.walk(bloonRootDirStr):
 
-            for name in files:
-                tmpAbsPath = os.path.join(relRoot, name)
-                tmpRelPath = tmpAbsPath[work_path_len:].replace("\\", "/")
-                file_set[tmpRelPath] = None
+                for name in dirs:
+                    tmpAbsPath = os.path.join(relRoot, name)
+                    tmpRelPath = tmpAbsPath[work_path_len:].replace("\\", "/")
+                    folder_set[tmpRelPath] = None
+
+                for name in files:
+                    tmpAbsPath = os.path.join(relRoot, name)
+                    tmpRelPath = tmpAbsPath[work_path_len:].replace("\\", "/")
+                    file_set[tmpRelPath] = None
+        except BaseException as e:
+            log.warn("os.walk has problem. e: " + str(e))
+            return (folder_set, file_set)
 
         # adding bloon root dir itself
         folder_set[bloonRootDirStr[work_path_len:]] = None

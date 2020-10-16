@@ -178,24 +178,27 @@ class RemoteTreeDataManager:
             "file_dict": {}
         }
 
-        async with websockets.connect(self._apiUrl, ssl=self._ssl_context, max_size=RemoteTreeDataManager.WSS_CLIENT_PAYLOAD_MAX_SIZE) as wss:
-            api = WssApiCaller(wss)
-            outData = await api.getShareInfo_async({"shareID": self.SHARE_ID})
-            shareData = outData["data"]["shareData"]
-            itemID = shareData["itemID"]
-            isFolder = shareData["isFolder"]
+        try:
+            async with websockets.connect(self._apiUrl, ssl=self._ssl_context, max_size=RemoteTreeDataManager.WSS_CLIENT_PAYLOAD_MAX_SIZE) as wss:
+                api = WssApiCaller(wss)
+                outData = await api.getShareInfo_async({"shareID": self.SHARE_ID})
+                shareData = outData["data"]["shareData"]
+                itemID = shareData["itemID"]
+                isFolder = shareData["isFolder"]
 
-            if isFolder:
-                await self._getChildFolderRecursiveUnit_async(api, self.SHARE_ID, [itemID], "", treeData)
+                if isFolder:
+                    await self._getChildFolderRecursiveUnit_async(api, self.SHARE_ID, [itemID], "", treeData)
 
-            else:
-                """
-                It will enter this block only if item itself of this sharelink is not a folder.
-                """
-                # outAll = await api.getCard_async({"shareID": shareID, "cardID": itemID})
-                # outData = outAll["data"]
-                # log.debug(outData)
-                log.info("This sharelink is not a folder.")
+                else:
+                    """
+                    It will enter this block only if item itself of this sharelink is not a folder.
+                    """
+                    # outAll = await api.getCard_async({"shareID": shareID, "cardID": itemID})
+                    # outData = outAll["data"]
+                    # log.debug(outData)
+                    log.info("This sharelink is not a folder.")
+        except BaseException as e:
+            log.warn("websocket connection problem. e: " + str(e))
 
         self._treeData_remote_current = treeData
 

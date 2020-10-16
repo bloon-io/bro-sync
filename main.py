@@ -9,16 +9,12 @@ from bro_sync.tree_data import RemoteTreeDataManager
 from bro_sync.action import DiffActionAgent
 from bro_sync.sync import BroSync
 
-
+logging.basicConfig(format="%(levelname)s %(message)s")
 log = logging.getLogger("bro-sync")
 log.setLevel(logging.INFO)
-log.addHandler(logging.StreamHandler())
 
 
 class Main:
-
-    SHARE_ID = None
-    WORK_DIR = None
 
     async def main(self):
 
