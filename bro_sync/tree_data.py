@@ -97,7 +97,7 @@ class RemoteTreeDataManager:
                     file_dict_db[tmpKey] = tmpVal
                 file_dict_db.commit()
 
-    def createDiffListForAction(self):
+    def updateDiffListForAction(self):
         folder_paths_need_to_make = []
         file_paths_need_to_download = []
 
@@ -108,8 +108,8 @@ class RemoteTreeDataManager:
         folder_set__previous = {} if self._treeData_remote_previous is None else self._treeData_remote_previous["folder_set"]
 
         # all new file path need to download
-        deff_folder_set = folder_set__current.keys() - folder_set__previous.keys()
-        folder_paths_need_to_make.extend(deff_folder_set)
+        diff_folder_set = folder_set__current.keys() - folder_set__previous.keys()
+        folder_paths_need_to_make.extend(diff_folder_set)
 
         # --------------------------------------------------
         # for files

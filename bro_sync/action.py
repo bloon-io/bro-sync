@@ -29,6 +29,13 @@ class DiffActionAgent:
         # to compare local tree and del garbage files & folders
         DiffActionAgent._deleteItemsByLocalDiffWithRemote(rtdm)
 
+        pre_bloon_name = rtdm.getPreviousTreeDataRemote()["ctx"]["bloon_name"]
+        cur_bloon_name = rtdm.getCurrentTreeDataRemote()["ctx"]["bloon_name"]
+        if pre_bloon_name is not cur_bloon_name:
+            pre_bloon_root_abs_path = os.path.join(rtdm.WORK_DIR_ABS_PATH_STR, pre_bloon_name)
+            log.info("[ACTION] rmtree: [" + pre_bloon_root_abs_path + "]")
+            shutil.rmtree(pre_bloon_root_abs_path)
+
     @staticmethod
     def _create_checksumRevIdxDict(treeData):
         if not treeData:
@@ -57,8 +64,8 @@ class DiffActionAgent:
         remote_file_dict = rtd_current["file_dict"]
 
         folder_paths_need_to_del = []
-        deff_folder_set = local_folder_set.keys() - remote_folder_set.keys()
-        folder_paths_need_to_del.extend(deff_folder_set)
+        diff_folder_set = local_folder_set.keys() - remote_folder_set.keys()
+        folder_paths_need_to_del.extend(diff_folder_set)
 
         file_paths_need_to_del = []
         deff_file_set = local_file_set.keys() - remote_file_dict.keys()

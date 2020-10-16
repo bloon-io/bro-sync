@@ -52,7 +52,7 @@ class BroSync:
         log.debug("")
 
         # --------------------------------------------------
-        rtdm.createDiffListForAction()
+        rtdm.updateDiffListForAction()
         diffListTuple = rtdm.getDiffForAction()
         log.debug("----------")
         log.debug("folder_paths_need_to_make & file_paths_need_to_download")
