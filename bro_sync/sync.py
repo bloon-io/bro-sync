@@ -20,15 +20,25 @@ class BroSync:
         self.shareID = shareID
         self.workDir = workDir
         self._lastSyncTime = 0.0
-        self._hasSync = False
 
     async def start_sync_service_async(self):
-        log.info("bro-sync servcie start.")
+        log.info("bro-sync servcie start...")
         while True:
             try:
-                if not self._hasSync:
-                    await self.sync_once_async()
-                    self._hasSync = True
+                await self.sync_once_async()
+                break
+            except BaseException as e:
+                errStr = str(e)
+                if errStr == "RESOURCE_NOT_EXIST":
+                    log.error("the share id is invalid, please check !\n")
+                    return
+                else:
+                    log.info("exception reason: [" + errStr + "]")
+                    log.info("re-try after 3s...")
+                    await asyncio.sleep(3)
+
+        while True:
+            try:
                 async with websockets.connect(Ctx.BLOON_ADJ_API_WSS_URL, ssl=Ctx.API_WSS_SSL_CONTEXT) as wss:
                     listener = WssApiListener(wss)
                     if not await listener.startListen(self.shareID):
@@ -39,8 +49,8 @@ class BroSync:
                     while True:
                         eventData = await listener.recvEventMessage()
                         if eventData:
+                            log.debug("listen event " + str(eventData))
                             self._lastSyncTime = datetime.now().timestamp()
-                            log.info("listen event " + str(eventData))
                             # run at anther thread
                             th = threading.Thread(target=self.delay_sync_server_in_event_loop, args=(self._lastSyncTime,))
                             th.start()

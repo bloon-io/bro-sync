@@ -173,27 +173,26 @@ class RemoteTreeDataManager:
             "file_dict": {}
         }
 
-        try:
-            async with websockets.connect(Ctx.BLOON_ADJ_API_WSS_URL, ssl=Ctx.API_WSS_SSL_CONTEXT, max_size=RemoteTreeDataManager.WSS_CLIENT_PAYLOAD_MAX_SIZE) as wss:
-                api = WssApiCaller(wss)
-                outData = await api.getShareInfo_async({"shareID": self.SHARE_ID})
-                shareData = outData["shareData"]
-                itemID = shareData["itemID"]
-                isFolder = shareData["isFolder"]
+        
+        async with websockets.connect(Ctx.BLOON_ADJ_API_WSS_URL, ssl=Ctx.API_WSS_SSL_CONTEXT, max_size=RemoteTreeDataManager.WSS_CLIENT_PAYLOAD_MAX_SIZE) as wss:
+            api = WssApiCaller(wss)
+            outData = await api.getShareInfo_async({"shareID": self.SHARE_ID})
+            shareData = outData["shareData"]
+            itemID = shareData["itemID"]
+            isFolder = shareData["isFolder"]
 
-                if isFolder:
-                    await self._getChildFolderRecursiveUnit_async(api, self.SHARE_ID, [itemID], "", treeData)
+            if isFolder:
+                await self._getChildFolderRecursiveUnit_async(api, self.SHARE_ID, [itemID], "", treeData)
 
-                else:
-                    """
-                    It will enter this block only if item itself of this sharelink is not a folder.
-                    """
-                    # outAll = await api.getCard_async({"shareID": shareID, "cardID": itemID})
-                    # outData = outAll["data"]
-                    # log.debug(outData)
-                    log.info("This sharelink is not a folder.")
-        except BaseException as e:
-            log.warn("websocket connection problem. e: " + str(e))
+            else:
+                """
+                It will enter this block only if item itself of this sharelink is not a folder.
+                """
+                # outAll = await api.getCard_async({"shareID": shareID, "cardID": itemID})
+                # outData = outAll["data"]
+                # log.debug(outData)
+                log.info("This sharelink is not a folder.")
+
 
         self._treeData_remote_current = treeData
 
