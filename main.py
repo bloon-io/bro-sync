@@ -46,7 +46,7 @@ class Main:
         if args.service:
             await broSync.start_sync_service_async()
         else:
-            await broSync.sync_once_async()
+            await broSync.start_sync_once_async()
 
 
 if __name__ == "__main__":

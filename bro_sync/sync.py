@@ -21,6 +21,17 @@ class BroSync:
         self.workDir = workDir
         self._lastSyncTime = 0.0
 
+    async def start_sync_once_async(self):
+        try:
+            await self.sync_once_async()
+        except BaseException as e:
+            errStr = str(e)
+            if errStr == "RESOURCE_NOT_EXIST":
+                log.error("the share id is invalid, please check !\n")
+                return
+            else:
+                log.info("exception reason: [" + errStr + "]")
+
     async def start_sync_service_async(self):
         log.info("bro-sync servcie start...")
         while True:
