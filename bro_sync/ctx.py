@@ -1,6 +1,11 @@
+import ssl
 
 class Ctx:
     CLOSE_SSL_CERT_VERIFY = True # for test only
+
+    API_WSS_SSL_CONTEXT = ssl.SSLContext(ssl.PROTOCOL_TLS_CLIENT)
+    API_WSS_SSL_CONTEXT.check_hostname = False  # for test only
+    API_WSS_SSL_CONTEXT.verify_mode = ssl.CERT_NONE  # for test only
 
     SERVICE_SYNC_LOOP_INTERVAL = 1 # sec.
 

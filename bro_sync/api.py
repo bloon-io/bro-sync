@@ -33,4 +33,43 @@ class WssApiCaller:
         await self.wss.send(reqStr)
         resStr = await self.wss.recv()
         outData = json.loads(resStr)
-        return outData
+        if outData and outData["output_state"] and outData["data"]:
+            if outData["output_state"] == "OK":
+                return outData["data"]
+            elif outData:
+                raise Exception(outData["data"]["err_code"])
+        raise Exception('UNKNOWN_ERR')
+
+
+class WssApiListener:
+
+    def __init__(self, wss):
+        self.wss = wss
+
+    async def startListen(self, shareID):
+        params = {
+            "token": None,
+            "shareID": shareID
+        }
+        inData = {
+            "func_name": "listenShareEvent", 
+            "cbID": "",
+            "params": params
+        }
+        reqStr = json.dumps(inData)
+        await self.wss.send(reqStr)
+        resStr = await self.wss.recv()
+        outData = json.loads(resStr)
+        if outData and outData["output_state"] == "OK":
+            return True
+        return False
+    
+    async def recvEventMessage(self):
+        log.debug("wait resv...")
+        resStr = await self.wss.recv()
+        log.debug("has resv str : " + resStr)
+        outData = json.loads(resStr)
+        if outData and outData["output_state"] == "OK":
+            return outData["data"]
+        return None
+

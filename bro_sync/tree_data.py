@@ -1,7 +1,6 @@
 
 import asyncio
 import pathlib
-import ssl
 import websockets
 import json
 import inspect
@@ -29,13 +28,6 @@ class RemoteTreeDataManager:
         self._treeData_remote_current = None
         self._treeData_remote_previous = None
         self._folders_and_files_diff_list_for_action = None
-
-        self._apiUrl = Ctx.BLOON_ADJ_API_WSS_URL
-
-        self._ssl_context = ssl.SSLContext(ssl.PROTOCOL_TLS_CLIENT)
-        if Ctx.CLOSE_SSL_CERT_VERIFY:
-            self._ssl_context.check_hostname = False  # for test only
-            self._ssl_context.verify_mode = ssl.CERT_NONE  # for test only
 
     """
     ==================================================
@@ -141,6 +133,9 @@ class RemoteTreeDataManager:
             if not os.path.exists(self._broSyncDbFileAbsPath):
                 return None
 
+            if not os.path.exists(self._bloonRootDir):
+                return None
+
             treeData = {}
 
             with SqliteDict(self._broSyncDbFileAbsPath, tablename="ctx") as ctx_db:
@@ -179,10 +174,10 @@ class RemoteTreeDataManager:
         }
 
         try:
-            async with websockets.connect(self._apiUrl, ssl=self._ssl_context, max_size=RemoteTreeDataManager.WSS_CLIENT_PAYLOAD_MAX_SIZE) as wss:
+            async with websockets.connect(Ctx.BLOON_ADJ_API_WSS_URL, ssl=Ctx.API_WSS_SSL_CONTEXT, max_size=RemoteTreeDataManager.WSS_CLIENT_PAYLOAD_MAX_SIZE) as wss:
                 api = WssApiCaller(wss)
                 outData = await api.getShareInfo_async({"shareID": self.SHARE_ID})
-                shareData = outData["data"]["shareData"]
+                shareData = outData["shareData"]
                 itemID = shareData["itemID"]
                 isFolder = shareData["isFolder"]
 
@@ -204,9 +199,9 @@ class RemoteTreeDataManager:
 
     async def _getChildFolderRecursiveUnit_async(self, api, shareID, folderIDs, localRelPath, treeData):
 
-        outAll = await api.getFoldersMin_async({"shareID": shareID, "folderIDs": folderIDs})
-        outFolders = outAll["data"]["folders"]
-        for folder in outFolders:
+        retData = await api.getFoldersMin_async({"shareID": shareID, "folderIDs": folderIDs})
+        folderDatas = retData["folders"]
+        for folder in folderDatas:
             name = folder["name"]
             childCards = []
             childRelPath = ""
@@ -229,8 +224,8 @@ class RemoteTreeDataManager:
             treeData["folder_set"][childRelPath] = None
 
             if len(folder["childCardIDs"]) > 0:
-                childOutAll = await api.getCardsMin_async({"shareID": shareID, "cardIDs": folder["childCardIDs"]})
-                childCards = childOutAll["data"]["cards"]
+                retData = await api.getCardsMin_async({"shareID": shareID, "cardIDs": folder["childCardIDs"]})
+                childCards = retData["cards"]
                     
             self._handle_childFiles(childRelPath, childCards, treeData)
 

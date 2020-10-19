@@ -29,12 +29,14 @@ class DiffActionAgent:
         # to compare local tree and del garbage files & folders
         DiffActionAgent._deleteItemsByLocalDiffWithRemote(rtdm)
 
-        pre_bloon_name = rtdm.getPreviousTreeDataRemote()["ctx"]["bloon_name"]
-        cur_bloon_name = rtdm.getCurrentTreeDataRemote()["ctx"]["bloon_name"]
-        if pre_bloon_name is not cur_bloon_name:
-            pre_bloon_root_abs_path = os.path.join(rtdm.WORK_DIR_ABS_PATH_STR, pre_bloon_name)
-            log.info("[ACTION] rmtree: [" + pre_bloon_root_abs_path + "]")
-            shutil.rmtree(pre_bloon_root_abs_path)
+        treeData = rtdm.getPreviousTreeDataRemote()
+        if treeData is not None:
+            pre_bloon_name = treeData["ctx"]["bloon_name"]
+            cur_bloon_name = rtdm.getCurrentTreeDataRemote()["ctx"]["bloon_name"]
+            if pre_bloon_name != cur_bloon_name:
+                pre_bloon_root_abs_path = os.path.join(rtdm.WORK_DIR_ABS_PATH_STR, pre_bloon_name)
+                log.info("[ACTION] rmtree: [" + pre_bloon_root_abs_path + "]")
+                shutil.rmtree(pre_bloon_root_abs_path)
 
     @staticmethod
     def _create_checksumRevIdxDict(treeData):
