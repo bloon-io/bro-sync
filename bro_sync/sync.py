@@ -30,7 +30,7 @@ class BroSync:
                 log.error("the share id is invalid, please check !\n")
                 return
             else:
-                log.info("exception reason: [" + errStr + "]")
+                log.error("exception reason: [" + errStr + "]")
 
     async def start_sync_service_async(self):
         log.info("bro-sync servcie start...")
