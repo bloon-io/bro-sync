@@ -133,9 +133,6 @@ class RemoteTreeDataManager:
             if not os.path.exists(self._broSyncDbFileAbsPath):
                 return None
 
-            if not os.path.exists(self._bloonRootDir):
-                return None
-
             treeData = {}
 
             with SqliteDict(self._broSyncDbFileAbsPath, tablename="ctx") as ctx_db:
