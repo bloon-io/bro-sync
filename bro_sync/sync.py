@@ -20,6 +20,7 @@ class BroSync:
         self.shareID = shareID
         self.workDir = workDir
         self._lastSyncTime = 0.0
+        self._mutex = threading.Lock()
 
     async def start_sync_once_async(self):
         try:
@@ -79,6 +80,7 @@ class BroSync:
     async def delay_sync_server_async(self, syncTime):
         await asyncio.sleep(Ctx.SERVICE_SYNC_LOOP_INTERVAL)
         if self._lastSyncTime == syncTime:
+            self._mutex.acquire()
             try:
                 time_str = datetime.now().strftime("%Y-%m%d %H:%M:%S")
                 log.info("----- service action @" + time_str + " -----")
@@ -86,6 +88,7 @@ class BroSync:
             except BaseException as e:
                 log.info("bro-sync sync failed.")
                 log.info("reason: [" + str(e) + "]")
+            self._mutex.release()
 
     async def sync_once_async(self):
         rtdm = RemoteTreeDataManager(self.workDir, self.shareID)
