@@ -67,7 +67,7 @@ $ python3 ./main.py eXaMpLE77 ../myBroSyncHome -s
 
 To start service in background
 ```
-$ python3 ./main.py --serice eXaMpLE77 ../myBroSyncHome &
+$ python3 ./main.py --service eXaMpLE77 ../myBroSyncHome &
 ```
 
 To stop bro-sync service, press "Ctrl + Break" or kill the process.
