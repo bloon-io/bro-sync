@@ -3,7 +3,9 @@
 To synchronize the folder you shared through a BLOON sharelink.
 
 The following line shows how to get an ID from a sharelink:
-`https://www.bloon.io/share/[a sharelink ID]/`
+```
+https://www.bloon.io/share/[a sharelink ID]/
+```
 
 How to get a shearlink?
 See [https://www.bloon.io/help/sharelinks][1]
@@ -51,14 +53,14 @@ optional arguments:
   --detail       show more details on screen
 ```
 
-## Usage Example ##
+## Example ##
 
-To synchronize a folder with the sharelink ID "eXaMpLE77" to the path "/home/patrick/myBroSyncHome".
+To synchronize once
 ```
 $ python3 ./main.py eXaMpLE77 /home/patrick/myBroSyncHome
 ```
 
-To synchronize a folder with the sharelink ID "eXaMpLE88" to a relative path "../myBroSyncHome" as a non-stop service.
+To start synchronizing as a non-stop service
 ```
 $ python3 ./main.py eXaMpLE77 ../myBroSyncHome -s
 ```
