@@ -19,7 +19,7 @@ class Main:
     async def main(self):
 
         parser = argparse.ArgumentParser(description=textwrap.indent(textwrap.dedent("""
-                To synchronize a folder you shared through a BLOON sharelink.
+                To synchronize the folder you shared through a BLOON sharelink.
 
                 The following line shows how to get an ID from a sharelink:
                 https://www.bloon.io/share/[a sharelink ID]/
