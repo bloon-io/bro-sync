@@ -9,9 +9,15 @@ from bro_sync.tree_data import RemoteTreeDataManager
 from bro_sync.action import DiffActionAgent
 from bro_sync.sync import BroSync
 
-logging.basicConfig(format="%(levelname)s %(message)s")
 log = logging.getLogger("bro-sync")
 log.setLevel(logging.INFO)
+
+log_stdout_handler = logging.StreamHandler(sys.stdout)
+log_stdout_handler.setLevel(logging.NOTSET)
+formatter = logging.Formatter("%(levelname)s %(message)s")
+log_stdout_handler.setFormatter(formatter)
+
+log.addHandler(log_stdout_handler)
 
 
 class Main:
