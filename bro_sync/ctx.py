@@ -8,7 +8,7 @@ class Ctx:
     # API_WSS_SSL_CONTEXT.check_hostname = False  # for test only
     # API_WSS_SSL_CONTEXT.verify_mode = ssl.CERT_NONE  # for test only
 
-    SERVICE_SYNC_LOOP_INTERVAL = 2 # sec.
+    SERVICE_SYNC_LOOP_INTERVAL = 0.5 # sec.
 
     DB_FILE_NAME = ".bro-sync.db"
     BLOON_DIRECT_LINK_URL_BASE = "https://direct.bloon.io/share"
