@@ -12,7 +12,7 @@ See [https://www.bloon.io/help/sharelinks][1]
 
 ## Dependencies ##
 
-* Python 3.5+
+* Python 3.6+
 * [websockets][2]
 * [sqlitedict][3]
 
