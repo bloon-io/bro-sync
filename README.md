@@ -19,20 +19,17 @@ See [https://www.bloon.io/help/sharelinks][1]
 ## Installation ##
 
 ```
+$ git clone https://github.com/bloon-io/bro-sync.git
+$ cd bro-sync
 $ pip3 install -r requirements.txt
 ```
 
-Or you can use [virtual environment][4]
-```
-$ virtualenv venv
-$ source ./venv/bin/activate
-$ pip install -r requirements.txt
-```
+# TODO now-here desc. install python 3.6 in ubuntu 16.04 
 
 ## Usage ##
 
 ```
-usage: main.py [-h] [-s] [-q] [--detail] SHARE_ID WORK_DIR
+usage: bro-sync.py [-h] [-s] [-q] [--detail] SHARE_ID WORK_DIR
 
   To synchronize a folder you shared through a BLOON sharelink.
 
@@ -57,17 +54,17 @@ optional arguments:
 
 To synchronize once
 ```
-$ python3 ./main.py eXaMpLE77 /home/patrick/myBroSyncHome
+$ python3 ./bro-sync.py eXaMpLE77 /home/patrick/myBroSyncHome
 ```
 
 To start synchronizing as a non-stop service
 ```
-$ python3 ./main.py eXaMpLE77 ../myBroSyncHome -s
+$ python3 ./bro-sync.py eXaMpLE77 ../myBroSyncHome -s
 ```
 
 To start service in background
 ```
-$ python3 ./main.py --service eXaMpLE77 ../myBroSyncHome &
+$ python3 ./bro-sync.py --service eXaMpLE77 ../myBroSyncHome &
 ```
 
 To stop bro-sync service, press "Ctrl + Break" or kill the process.
@@ -80,4 +77,3 @@ sid="eXaMpLE88"; kill -9 $(ps aux | grep -v grep | grep "$sid" | awk '{print $2}
 [1]: https://www.bloon.io/help/sharelinks
 [2]: https://pypi.org/project/websockets/
 [3]: https://pypi.org/project/sqlitedict/
-[4]: https://docs.python-guide.org/dev/virtualenvs/
