@@ -1,3 +1,5 @@
+#### [繁體中文][101], [English][100]
+
 ## BLOON Read-Only Sync ##
 
 To synchronize the folder you shared through a BLOON sharelink.
@@ -24,7 +26,7 @@ $ cd bro-sync
 $ pip3 install -r requirements.txt
 ```
 
-# TODO now-here desc. install python 3.6 in ubuntu 16.04 
+# TODO now-here 說明 ubuntu 16.04 安裝 python 3.6
 
 ## Usage ##
 
@@ -77,3 +79,6 @@ sid="eXaMpLE88"; kill -9 $(ps aux | grep -v grep | grep "$sid" | awk '{print $2}
 [1]: https://www.bloon.io/help/sharelinks
 [2]: https://pypi.org/project/websockets/
 [3]: https://pypi.org/project/sqlitedict/
+
+[100]: https://github.com/bloon-io/bro-sync/blob/master/README.md
+[101]: https://github.com/bloon-io/bro-sync/blob/master/README_zh_TW.md
