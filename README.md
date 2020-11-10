@@ -2,7 +2,9 @@
 
 ## BLOON Read-Only Sync
 
-To synchronize the folder you shared through a BLOON sharelink. "Read-Only Sync" means download only, no changes in local will be synchronized to other devices.
+To synchronize the folder you shared through a BLOON sharelink.
+
+"Read-Only Sync" means download only, no changes in local will be synchronized to other devices.
 
 The following line shows how to get an ID from a sharelink:
 
@@ -19,7 +21,7 @@ How to get a shearlink? See [https://www.bloon.io/help/sharelinks][1]
 - [websockets][2]
 - [sqlitedict][3]
 
-The default python3 version in Ubuntu 16.04 is 3.5.2. You can see [this page][102] to know how to install Python 3.6+ in Ubuntu 16.04. (Ubuntu 18.04 is Python 3.6.9; Debian 10 is Python 3.7.3)
+The default python3 version in Ubuntu 16.04 is 3.5.2. You can see [this page][102] to know how to install Python 3.6+ in Ubuntu 16.04.
 
 ## Installation
 

@@ -2,7 +2,9 @@
 
 ## BLOON Read-Only Sync
 
-同步 BLOON 分享連結所分享的資料夾。「唯讀同步 (Read-Only Sync)」意思是僅下載，而不會將本地修改同步到其他裝置上。
+同步 BLOON 分享連結所分享的資料夾。
+
+「唯讀同步 (Read-Only Sync)」意思是僅下載，而不會將本地修改同步到其他裝置上。
 
 以下顯示如何取得「sharelink ID」
 
@@ -19,7 +21,7 @@ https://www.bloon.io/share/[a sharelink ID]/
 - [websockets][2]
 - [sqlitedict][3]
 
-Ubuntu 16.04 預設的 python3 版本是 3.5.2，你可以參考[此頁][102]說明，在 Ubuntu 16.04 上正確安裝 Python 3.6 ( 以上 ) 版本。( Ubuntu 18.04 是 Python 3.6.9; Debian 10 是 Python 3.7.3 )
+Ubuntu 16.04 預設的 python3 版本是 3.5.2，你可以參考[此頁][102]說明，在 Ubuntu 16.04 上正確安裝 Python 3.6 ( 以上 ) 版本。
 
 ## 安裝方式
 
