@@ -1,4 +1,4 @@
-## [繁體中文][101], [English][100]
+### [English][100], [繁體中文][101]
 
 ## BLOON Read-Only Sync
 
@@ -10,14 +10,16 @@ The following line shows how to get an ID from a sharelink:
 https://www.bloon.io/share/[a sharelink ID]/
 ```
 
-How to get a shearlink?
-See [https://www.bloon.io/help/sharelinks][1]
+How to get a shearlink? See [https://www.bloon.io/help/sharelinks][1]
 
 ## Dependencies
 
+- Mac / Linux / Windows
 - Python 3.6+
 - [websockets][2]
 - [sqlitedict][3]
+
+The default python3 version in Ubuntu 16.04 is 3.5.2. You can see [this page][102] to know how to install Python 3.6+ in Ubuntu 16.04. (Ubuntu 18.04 is Python 3.6.9; Debian 10 is Python 3.7.3)
 
 ## Installation
 
@@ -30,6 +32,9 @@ $ pip3 install -r requirements.txt
 ## Usage
 
 ```
+$ cd bro-sync
+$ python3 ./bro-sync.py
+
 usage: bro-sync.py [-h] [-s] [-q] [--detail] SHARE_ID WORK_DIR
 
   To synchronize a folder you shared through a BLOON sharelink.
@@ -53,7 +58,7 @@ optional arguments:
 
 ## Example
 
-To synchronize once
+To synchronize once (batch download the contents of this folder)
 
 ```
 $ python3 ./bro-sync.py eXaMpLE77 /home/patrick/myBroSyncHome
@@ -83,4 +88,5 @@ sid="eXaMpLE88"; kill -9 $(ps aux | grep -v grep | grep "$sid" | awk '{print $2}
 [2]: https://pypi.org/project/websockets/
 [3]: https://pypi.org/project/sqlitedict/
 [100]: https://github.com/bloon-io/bro-sync/blob/master/README.md
-[101]: https://github.com/bloon-io/bro-sync/blob/master/README_zh_TW.md
+[101]: https://github.com/bloon-io/bro-sync/blob/master/misc/README_zh_TW.md
+[102]: https://github.com/bloon-io/bro-sync/blob/master/misc/ubuntu16.04_install_py3.6.md

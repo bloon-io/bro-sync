@@ -1,8 +1,8 @@
-## [繁體中文][101], [English][100]
+### [English][100], [繁體中文][101]
 
 ## BLOON Read-Only Sync
 
-同步藉由 BLOON 分享連結所分享的資料夾。
+同步 BLOON 分享連結所分享的資料夾。
 
 以下顯示如何取得「sharelink ID」
 
@@ -10,14 +10,16 @@
 https://www.bloon.io/share/[a sharelink ID]/
 ```
 
-如何建立分享連結？請參考：
-[https://www.bloon.io/help/sharelinks][1]
+如何建立分享連結？請參考：[https://www.bloon.io/help/sharelinks][1]
 
 ## 相依套件
 
+- Mac / Linux / Windows
 - Python 3.6+
 - [websockets][2]
 - [sqlitedict][3]
+
+Ubuntu 16.04 預設的 python3 版本是 3.5.2，你可以參考[此頁][102]說明，在 Ubuntu 16.04 上正確安裝 Python 3.6 ( 以上 ) 版本。( Ubuntu 18.04 是 Python 3.6.9; Debian 10 是 Python 3.7.3 )
 
 ## 安裝方式
 
@@ -56,13 +58,13 @@ optional arguments:
 
 ## 使用範例
 
-進行一次性的同步：
+僅進行一次同步 ( 即資料夾內容批次下載 )：
 
 ```
 $ python3 ./bro-sync.py eXaMpLE77 /home/patrick/myBroSyncHome
 ```
 
-將 bro-sync 啟動為服務，持續同步其他裝置上的檔案異動：
+將 bro-sync 啟動為服務，持續監測並同步其他裝置上的檔案異動：
 
 ```
 $ python3 ./bro-sync.py eXaMpLE77 ../myBroSyncHome --service
@@ -76,7 +78,7 @@ $ python3 ./bro-sync.py -s eXaMpLE77 ../myBroSyncHome &
 
 要停止 bro-sync 服務，你可以按下「Ctrl + Break」中斷程式 ( 在非背景執行情況下 )，或是砍除應用程式。
 
-舉例來說，如果 bro-sync 服務在背景執行，並且其 sharelink ID 是「eXaMpLE88」，你可以使用以下簡單的 shell script 挑出其 PID 並砍除程式：
+舉例來說，如果 bro-sync 在背景執行，並且其 sharelink ID 是「eXaMpLE88」，你可以使用以下簡單的 shell script 挑出其 PID 並砍除程式：
 
 ```
 sid="eXaMpLE88"; kill -9 $(ps aux | grep -v grep | grep "$sid" | awk '{print $2}')
@@ -86,4 +88,5 @@ sid="eXaMpLE88"; kill -9 $(ps aux | grep -v grep | grep "$sid" | awk '{print $2}
 [2]: https://pypi.org/project/websockets/
 [3]: https://pypi.org/project/sqlitedict/
 [100]: https://github.com/bloon-io/bro-sync/blob/master/README.md
-[101]: https://github.com/bloon-io/bro-sync/blob/master/README_zh_TW.md
+[101]: https://github.com/bloon-io/bro-sync/blob/master/misc/README_zh_TW.md
+[102]: https://github.com/bloon-io/bro-sync/blob/master/misc/ubuntu16.04_install_py3.6.md
