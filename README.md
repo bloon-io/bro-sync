@@ -2,7 +2,7 @@
 
 ## BLOON Read-Only Sync
 
-To synchronize the folder you shared through a BLOON sharelink.
+To synchronize the folder you shared through a BLOON sharelink. "Read-Only Sync" means download only, no changes in local will be synchronized to other devices.
 
 The following line shows how to get an ID from a sharelink:
 
