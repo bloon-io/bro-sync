@@ -25,6 +25,6 @@ $ make
 $ make install
 ```
 
-P.S. You can change the version string "3.6.9" above to other ones. Choose the version string you want in [this official FTP page][1].
+P.S. You can change the version "3.6.9" above to other ones. Choose the version string you want in [this official FTP page][1].
 
 [1]: https://www.python.org/ftp/python

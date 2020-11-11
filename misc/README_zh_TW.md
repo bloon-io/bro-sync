@@ -2,9 +2,9 @@
 
 ## BLOON Read-Only Sync
 
-同步 BLOON 分享連結所分享的資料夾。
+同步藉由 BLOON 分享連結所分享的資料夾。
 
-「唯讀同步 (Read-Only Sync)」意思是僅下載，而不會將本地修改同步到其他裝置上。
+「Read-Only Sync ( 唯讀同步 )」意思是僅下載，而不會將本地修改同步到其他裝置上。
 
 以下顯示如何取得「sharelink ID」
 
