@@ -92,7 +92,7 @@ class BroSync:
             await asyncio.sleep(Ctx.SYNC_DELAY_MODE_DELAY_SEC)
         else:
             self._delay_mode = True
-            log.info("sync delay mode [ON]")
+            log.debug("sync delay mode [ON]")
             threading.Thread(target=self._close_delay_mode_after_a_while, daemon=True).start()
 
         if self._lastSyncTime != syncTime:
@@ -119,7 +119,7 @@ class BroSync:
         while self._in_sequence_recv_state:
             time.sleep(time_to_wait)
         self._delay_mode = False
-        log.info("sync delay mode [OFF]")
+        log.debug("sync delay mode [OFF]")
 
     async def sync_once_async(self):
         rtdm = RemoteTreeDataManager(self.workDir, self.shareID)
