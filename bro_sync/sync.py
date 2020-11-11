@@ -25,6 +25,7 @@ class BroSync:
         self._mutex = threading.Lock()
         self._delay_mode = False
         self._in_sequence_recv_state = False
+        self._err_retry_interval = Ctx.SYNC_ERR_RE_TRY_BASE_INTERVAL_SEC
 
     async def start_sync_once_async(self):
         try:
@@ -69,14 +70,19 @@ class BroSync:
                             log.debug("listen event " + str(eventData))
                             self._lastSyncTime = datetime.now().timestamp()
                             # run at anther thread
-                            threading.Thread(target=self._delay_sync_in_thread, args=(self._lastSyncTime,), daemon=True).start()
+                            threading.Thread(target=self._delay_sync_in_thread, args=(self._lastSyncTime, False), daemon=True).start()
 
             except BaseException as e:
                 log.warning("exception reason: [" + str(e) + "]")
                 log.info("re-try after 5s...")
                 await asyncio.sleep(5)
 
-    def _delay_sync_in_thread(self, syncTime):
+    def _delay_sync_in_thread(self, syncTime, is_from_re_try):
+        if is_from_re_try:
+            log.info("re-try after " + str(self._err_retry_interval) + "s...")
+            time.sleep(self._err_retry_interval)
+            self._err_retry_interval += 0 if self._err_retry_interval > Ctx.SYNC_ERR_RE_TRY_BASE_INTERVAL_MAX_SEC else Ctx.SYNC_ERR_RE_TRY_BASE_INTERVAL_SEC
+
         loop = asyncio.new_event_loop()
         loop.run_until_complete(self._delay_sync_async(syncTime))
         loop.close()
@@ -86,29 +92,34 @@ class BroSync:
             await asyncio.sleep(Ctx.SYNC_DELAY_MODE_DELAY_SEC)
         else:
             self._delay_mode = True
-            log.debug("sync delay mode [ON]")
-            threading.Thread(target=self._close_delay_mode_after_a_while, args=(syncTime,), daemon=True).start()
+            log.info("sync delay mode [ON]")
+            threading.Thread(target=self._close_delay_mode_after_a_while, daemon=True).start()
 
         if self._lastSyncTime != syncTime:
             self._in_sequence_recv_state = True
         else:
             self._in_sequence_recv_state = False
             self._mutex.acquire()
+
             try:
                 time_str = datetime.now().strftime("%Y-%m%d %H:%M:%S")
                 log.info("----- service action @" + time_str + " -----")
                 await self.sync_once_async()
+                self._err_retry_interval = Ctx.SYNC_ERR_RE_TRY_BASE_INTERVAL_SEC
             except BaseException as e:
                 log.warning("bro-sync sync failed. reason: [" + str(e) + "]")
+                # re-try in new thread
+                threading.Thread(target=self._delay_sync_in_thread, args=(syncTime, True), daemon=True).start()
+
             self._mutex.release()
 
-    def _close_delay_mode_after_a_while(self, syncTime):
+    def _close_delay_mode_after_a_while(self):
         time_to_wait = Ctx.SYNC_DELAY_MODE_DELAY_SEC * (1.1)
         time.sleep(time_to_wait)
         while self._in_sequence_recv_state:
             time.sleep(time_to_wait)
         self._delay_mode = False
-        log.debug("sync delay mode [OFF]")
+        log.info("sync delay mode [OFF]")
 
     async def sync_once_async(self):
         rtdm = RemoteTreeDataManager(self.workDir, self.shareID)
