@@ -68,7 +68,6 @@ class BroSync:
                         if eventData:
                             log.debug("listen event " + str(eventData))
                             self._lastSyncTime = datetime.now().timestamp()
-                            log.info("-------------------------------------------------- 11")
                             # run at anther thread
                             threading.Thread(target=self._delay_sync_in_thread, args=(self._lastSyncTime,), daemon=True).start()
 
@@ -87,7 +86,7 @@ class BroSync:
             await asyncio.sleep(Ctx.SYNC_DELAY_MODE_DELAY_SEC)
         else:
             self._delay_mode = True
-            log.info("sync delay mode [ON]")
+            log.debug("sync delay mode [ON]")
             threading.Thread(target=self._close_delay_mode_after_a_while, args=(syncTime,), daemon=True).start()
 
         if self._lastSyncTime != syncTime:
@@ -98,7 +97,6 @@ class BroSync:
             try:
                 time_str = datetime.now().strftime("%Y-%m%d %H:%M:%S")
                 log.info("----- service action @" + time_str + " -----")
-                log.info("-------------------------------------------------- 22 syncTime: " + str(syncTime))
                 await self.sync_once_async()
             except BaseException as e:
                 log.warning("bro-sync sync failed. reason: [" + str(e) + "]")
@@ -110,7 +108,7 @@ class BroSync:
         while self._in_sequence_recv_state:
             time.sleep(time_to_wait)
         self._delay_mode = False
-        log.info("sync delay mode [OFF]")
+        log.debug("sync delay mode [OFF]")
 
     async def sync_once_async(self):
         rtdm = RemoteTreeDataManager(self.workDir, self.shareID)
