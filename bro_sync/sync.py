@@ -4,6 +4,8 @@ import json
 import logging
 import websockets
 import threading
+import traceback
+import time
 from datetime import datetime
 from bro_sync.tree_data import RemoteTreeDataManager
 from bro_sync.action import DiffActionAgent
@@ -21,6 +23,8 @@ class BroSync:
         self.workDir = workDir
         self._lastSyncTime = 0.0
         self._mutex = threading.Lock()
+        self._delay_mode = False
+        self._in_sequence_recv_state = False
 
     async def start_sync_once_async(self):
         try:
@@ -32,6 +36,7 @@ class BroSync:
                 return
             else:
                 log.error("exception reason: [" + errStr + "]")
+                # traceback.print_exc()
 
     async def start_sync_service_async(self):
         log.info("bro-sync servcie start...")
@@ -63,32 +68,49 @@ class BroSync:
                         if eventData:
                             log.debug("listen event " + str(eventData))
                             self._lastSyncTime = datetime.now().timestamp()
+                            log.info("-------------------------------------------------- 11")
                             # run at anther thread
-                            th = threading.Thread(target=self.delay_sync_server_in_event_loop, args=(self._lastSyncTime,))
-                            th.start()
+                            threading.Thread(target=self._delay_sync_in_thread, args=(self._lastSyncTime,), daemon=True).start()
 
             except BaseException as e:
-                log.info("exception reason: [" + str(e) + "]")
+                log.warning("exception reason: [" + str(e) + "]")
                 log.info("re-try after 5s...")
                 await asyncio.sleep(5)
 
-    def delay_sync_server_in_event_loop(self, syncTime):
+    def _delay_sync_in_thread(self, syncTime):
         loop = asyncio.new_event_loop()
-        loop.run_until_complete(self.delay_sync_server_async(syncTime))
+        loop.run_until_complete(self._delay_sync_async(syncTime))
         loop.close()
 
-    async def delay_sync_server_async(self, syncTime):
-        await asyncio.sleep(Ctx.SERVICE_SYNC_LOOP_INTERVAL)
-        if self._lastSyncTime == syncTime:
+    async def _delay_sync_async(self, syncTime):
+        if self._delay_mode:
+            await asyncio.sleep(Ctx.SYNC_DELAY_MODE_DELAY_SEC)
+        else:
+            self._delay_mode = True
+            log.info("sync delay mode [ON]")
+            threading.Thread(target=self._close_delay_mode_after_a_while, args=(syncTime,), daemon=True).start()
+
+        if self._lastSyncTime != syncTime:
+            self._in_sequence_recv_state = True
+        else:
+            self._in_sequence_recv_state = False
             self._mutex.acquire()
             try:
                 time_str = datetime.now().strftime("%Y-%m%d %H:%M:%S")
                 log.info("----- service action @" + time_str + " -----")
+                log.info("-------------------------------------------------- 22 syncTime: " + str(syncTime))
                 await self.sync_once_async()
             except BaseException as e:
-                log.info("bro-sync sync failed.")
-                log.info("reason: [" + str(e) + "]")
+                log.warning("bro-sync sync failed. reason: [" + str(e) + "]")
             self._mutex.release()
+
+    def _close_delay_mode_after_a_while(self, syncTime):
+        time_to_wait = Ctx.SYNC_DELAY_MODE_DELAY_SEC * (1.1)
+        time.sleep(time_to_wait)
+        while self._in_sequence_recv_state:
+            time.sleep(time_to_wait)
+        self._delay_mode = False
+        log.info("sync delay mode [OFF]")
 
     async def sync_once_async(self):
         rtdm = RemoteTreeDataManager(self.workDir, self.shareID)
