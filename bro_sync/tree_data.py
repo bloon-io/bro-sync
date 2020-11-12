@@ -11,6 +11,7 @@ import logging
 from sqlitedict import SqliteDict
 from bro_sync.api import WssApiCaller
 from bro_sync.ctx import Ctx
+from bro_sync.utils import Utils
 
 log = logging.getLogger("bro-sync")
 
@@ -78,7 +79,8 @@ class RemoteTreeDataManager:
                 folder_set_db.clear()
                 folder_set = self._treeData_remote_current["folder_set"]
                 for tmpKey in folder_set:
-                    folder_set_db[tmpKey] = None
+                    tmpVal = folder_set[tmpKey]
+                    folder_set_db[tmpKey] = tmpVal
                 folder_set_db.commit()
 
             with SqliteDict(self._broSyncDbFileAbsPath, tablename="file_dict") as file_dict_db:
@@ -145,7 +147,8 @@ class RemoteTreeDataManager:
             with SqliteDict(self._broSyncDbFileAbsPath, tablename="folder_set") as folder_set_db:
                 folder_set_mem = {}
                 for tmpKey in folder_set_db:
-                    folder_set_mem[tmpKey] = None
+                    tmpVal = folder_set_db[tmpKey]
+                    folder_set_mem[tmpKey] = tmpVal
                 treeData["folder_set"] = folder_set_mem
 
             with SqliteDict(self._broSyncDbFileAbsPath, tablename="file_dict") as file_dict_db:
@@ -198,14 +201,16 @@ class RemoteTreeDataManager:
         retData = await api.getFoldersMin_async({"shareID": shareID, "folderIDs": folderIDs})
         folderDatas = retData["folders"]
         for folder in folderDatas:
+            folderID = folder["folderID"]
             name = folder["name"]
+            folderName = Utils.getAvailableFileBaseName(name, True)
             childCards = []
             childRelPath = ""
 
             if not localRelPath:
                 # mean it is root
                 treeData["ctx"]["bloon_name"] = name
-                root_localRelPath = name
+                root_localRelPath = folderName
 
                 self._bloonRootDir = os.path.join(self.WORK_DIR_ABS_PATH_STR, root_localRelPath)
                 log.debug("_bloonRootDir: [" + self._bloonRootDir + "]")
@@ -215,9 +220,9 @@ class RemoteTreeDataManager:
 
                 childRelPath = root_localRelPath
             else:
-                childRelPath = localRelPath + "/" + name
+                childRelPath = localRelPath + "/" + folderName
                 
-            treeData["folder_set"][childRelPath] = None
+            treeData["folder_set"][childRelPath] = folderID
 
             if len(folder["childCardIDs"]) > 0:
                 retData = await api.getCardsMin_async({"shareID": shareID, "cardIDs": folder["childCardIDs"]})
@@ -232,8 +237,9 @@ class RemoteTreeDataManager:
     def _handle_childFiles(localRelPath, childCards, treeData):
 
         for childCard in childCards:
-            chC_name = childCard["name"]
+            chC_id = childCard["cardID"]
             chC_extension = childCard["extension"]
+            chC_name = Utils.getAvailableFileBaseName(childCard["name"], not chC_extension)
             chC_version = childCard["version"]  # int
             chC_checksum_b64str = childCard["checksum"]  # binary in base64 format string
             chC_checksum_str = base64.b64decode(chC_checksum_b64str).decode("UTF-8")
@@ -243,4 +249,4 @@ class RemoteTreeDataManager:
             else:
                 chC_localRelPath = localRelPath + "/" + chC_name
 
-            treeData["file_dict"][chC_localRelPath] = (chC_version, chC_checksum_str)
+            treeData["file_dict"][chC_localRelPath] = (chC_version, chC_checksum_str, chC_id)

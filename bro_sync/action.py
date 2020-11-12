@@ -157,11 +157,12 @@ class DiffActionAgent:
     @staticmethod
     def _createFileByDownload(rtdm, fileRelPath):
         direct_link = Ctx.BLOON_DIRECT_LINK_URL_BASE + "/" + rtdm.SHARE_ID
-        bloon_name = rtdm.getCurrentTreeDataRemote()["ctx"]["bloon_name"]
-        directLinkRelPath = fileRelPath[len(bloon_name) + 1:]  # remove leading bloon name, "+1" is for char "/"
-        directLinkRelPath = urllib.parse.quote(directLinkRelPath)  # url percent-encoding
+        card_id = rtdm.getCurrentTreeDataRemote()["file_dict"][fileRelPath][2]
+        # bloon_name = rtdm.getCurrentTreeDataRemote()["ctx"]["bloon_name"]
+        # directLinkRelPath = fileRelPath[len(bloon_name) + 1:]  # remove leading bloon name, "+1" is for char "/"
+        # directLinkRelPath = urllib.parse.quote(directLinkRelPath)  # url percent-encoding
 
-        download_link = direct_link + "/" + directLinkRelPath
+        download_link = direct_link + "?c=" + card_id + "&dl"
         log.info("[ACTION] download_link: [" + download_link + "]")
 
         file_abs_path = os.path.join(rtdm.WORK_DIR_ABS_PATH_STR, fileRelPath)
