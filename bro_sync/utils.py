@@ -11,4 +11,10 @@ class Utils:
             fileName = re.sub( r'\.+$', '_', fileName); 
         return fileName
 
+    @staticmethod
+    def getFileName(baseName, extension, index):
+        dotExtension = '.' + extension if extension else ''
+        return baseName + dotExtension if index == 0 else baseName + ' (' + str(index) + ')' + dotExtension
+
+
 

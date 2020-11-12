@@ -221,6 +221,12 @@ class RemoteTreeDataManager:
                 childRelPath = root_localRelPath
             else:
                 childRelPath = localRelPath + "/" + folderName
+                index = 0
+                while childRelPath in treeData["folder_set"]:
+                    log.debug("folder path exist : " + str(childRelPath))
+                    index += 1
+                    childRelPath = localRelPath + "/" + Utils.getFileName(folderName, '', index)
+
                 
             treeData["folder_set"][childRelPath] = folderID
 
@@ -244,9 +250,11 @@ class RemoteTreeDataManager:
             chC_checksum_b64str = childCard["checksum"]  # binary in base64 format string
             chC_checksum_str = base64.b64decode(chC_checksum_b64str).decode("UTF-8")
 
-            if chC_extension:
-                chC_localRelPath = localRelPath + "/" + chC_name + "." + chC_extension
-            else:
-                chC_localRelPath = localRelPath + "/" + chC_name
+            index = 0
+            chC_localRelPath = localRelPath + "/" + Utils.getFileName(chC_name, chC_extension, index)
+            while chC_localRelPath in treeData["file_dict"]:
+                log.debug("file path exist : " + str(chC_localRelPath))
+                index += 1
+                chC_localRelPath = localRelPath + "/" + Utils.getFileName(chC_name, chC_extension, index)
 
             treeData["file_dict"][chC_localRelPath] = (chC_version, chC_checksum_str, chC_id)
