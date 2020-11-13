@@ -21,7 +21,7 @@ class BroSync:
     def __init__(self, shareID, workDir):
         self.shareID = shareID
         self.workDir = workDir
-        self._lastSyncTime = 0.0
+        self._lastSyncVersion = 0
         self._mutex = threading.Lock()
         self._delay_mode = False
         self._in_sequence_recv_state = False
@@ -68,26 +68,27 @@ class BroSync:
                         eventData = await listener.recvEventMessage()
                         if eventData:
                             log.debug("listen event " + str(eventData))
-                            self._lastSyncTime = datetime.now().timestamp()
+                            self._lastSyncVersion = eventData["version"]
+                            RemoteTreeDataManager.REMOTE_VERSION = self._lastSyncVersion
                             # run at anther thread
-                            threading.Thread(target=self._delay_sync_in_thread, args=(self._lastSyncTime, False), daemon=True).start()
+                            threading.Thread(target=self._delay_sync_in_thread, args=(self._lastSyncVersion, False), daemon=True).start()
 
             except BaseException as e:
                 log.warning("exception reason: [" + str(e) + "]")
                 log.info("re-try after 5s...")
                 await asyncio.sleep(5)
 
-    def _delay_sync_in_thread(self, syncTime, is_from_re_try):
+    def _delay_sync_in_thread(self, syncVersion, is_from_re_try):
         if is_from_re_try:
             log.info("re-try after " + str(self._err_retry_interval) + "s...")
             time.sleep(self._err_retry_interval)
             self._err_retry_interval += 0 if self._err_retry_interval > Ctx.SYNC_ERR_RE_TRY_BASE_INTERVAL_MAX_SEC else Ctx.SYNC_ERR_RE_TRY_BASE_INTERVAL_SEC
 
         loop = asyncio.new_event_loop()
-        loop.run_until_complete(self._delay_sync_async(syncTime))
+        loop.run_until_complete(self._delay_sync_async(syncVersion))
         loop.close()
 
-    async def _delay_sync_async(self, syncTime):
+    async def _delay_sync_async(self, syncVersion):
         if self._delay_mode:
             await asyncio.sleep(Ctx.SYNC_DELAY_MODE_DELAY_SEC)
         else:
@@ -95,7 +96,7 @@ class BroSync:
             log.debug("sync delay mode [ON]")
             threading.Thread(target=self._close_delay_mode_after_a_while, daemon=True).start()
 
-        if self._lastSyncTime != syncTime:
+        if self._lastSyncVersion != syncVersion:
             self._in_sequence_recv_state = True
         else:
             self._in_sequence_recv_state = False
@@ -109,7 +110,7 @@ class BroSync:
             except BaseException as e:
                 log.warning("bro-sync sync failed. reason: [" + str(e) + "]")
                 # re-try in new thread
-                threading.Thread(target=self._delay_sync_in_thread, args=(syncTime, True), daemon=True).start()
+                threading.Thread(target=self._delay_sync_in_thread, args=(syncVersion, True), daemon=True).start()
 
             self._mutex.release()
 

@@ -19,6 +19,8 @@ log = logging.getLogger("bro-sync")
 class RemoteTreeDataManager:
 
     WSS_CLIENT_PAYLOAD_MAX_SIZE = 10 * 1024 * 1024  # 10MB
+    REMOTE_VERSION = 0
+    IGNORE_CARD_TYPE = [3, 5, 11, 12, 13, 14]
 
     def __init__(self, workDir, shareID):
         self.WORK_DIR_ABS_PATH_STR = os.path.abspath(workDir)
@@ -177,12 +179,23 @@ class RemoteTreeDataManager:
         async with websockets.connect(Ctx.BLOON_ADJ_API_WSS_URL, ssl=Ctx.API_WSS_SSL_CONTEXT, max_size=RemoteTreeDataManager.WSS_CLIENT_PAYLOAD_MAX_SIZE) as wss:
             api = WssApiCaller(wss)
             outData = await api.getShareInfo_async({"shareID": self.SHARE_ID})
+            version = outData["version"]
+            log.debug("share link version " + str(version))
+            waitTs = 0
+            while RemoteTreeDataManager.REMOTE_VERSION != 0 and RemoteTreeDataManager.REMOTE_VERSION > version:
+                waitTs += 1
+                log.info("server version is old, wait " + str(waitTs) + " sec...")
+                await asyncio.sleep(waitTs)
+                outData = await api.getShareInfo_async({"shareID": self.SHARE_ID})
+                version = outData["version"]
+
             shareData = outData["shareData"]
             itemID = shareData["itemID"]
             isFolder = shareData["isFolder"]
+            bloonID = shareData["bloonID"]
 
             if isFolder:
-                await self._getChildFolderRecursiveUnit_async(api, self.SHARE_ID, [itemID], "", treeData)
+                await self._getChildFolderRecursiveUnit_async(api, self.SHARE_ID, bloonID, [itemID], "", treeData)
 
             else:
                 """
@@ -196,9 +209,9 @@ class RemoteTreeDataManager:
 
         self._treeData_remote_current = treeData
 
-    async def _getChildFolderRecursiveUnit_async(self, api, shareID, folderIDs, localRelPath, treeData):
+    async def _getChildFolderRecursiveUnit_async(self, api, shareID, bloonID, folderIDs, localRelPath, treeData):
 
-        retData = await api.getFoldersMin_async({"shareID": shareID, "folderIDs": folderIDs})
+        retData = await api.getFoldersMin_async({"shareID": shareID, "bloonID": bloonID, "folderIDs": folderIDs})
         folderDatas = retData["folders"]
         for folder in folderDatas:
             folderID = folder["folderID"]
@@ -231,18 +244,21 @@ class RemoteTreeDataManager:
             treeData["folder_set"][childRelPath] = folderID
 
             if len(folder["childCardIDs"]) > 0:
-                retData = await api.getCardsMin_async({"shareID": shareID, "cardIDs": folder["childCardIDs"]})
+                retData = await api.getCardsMin_async({"shareID": shareID, "bloonID": bloonID, "cardIDs": folder["childCardIDs"]})
                 childCards = retData["cards"]
                     
             self._handle_childFiles(childRelPath, childCards, treeData)
 
             if len(folder["childFolderIDs"]) > 0:
-                await self._getChildFolderRecursiveUnit_async(api, shareID, folder["childFolderIDs"], childRelPath, treeData)
+                await self._getChildFolderRecursiveUnit_async(api, shareID, bloonID, folder["childFolderIDs"], childRelPath, treeData)
 
     @staticmethod
     def _handle_childFiles(localRelPath, childCards, treeData):
 
         for childCard in childCards:
+            if childCard["typeInt"] in RemoteTreeDataManager.IGNORE_CARD_TYPE:
+                log.debug("Ignore Non-File Card...")
+                continue
             chC_id = childCard["cardID"]
             chC_extension = childCard["extension"]
             chC_name = Utils.getAvailableFileBaseName(childCard["name"], not chC_extension)
