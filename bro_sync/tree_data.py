@@ -169,13 +169,12 @@ class RemoteTreeDataManager:
             "ctx": {
                 "bloon_name": None
             },
-            # elements are just localRelPath string of folders
+            # key: <localRelPath string of folder>; value: <folder ID>
             "folder_set": {},
-            # element key: localRelPath string of file; element value: Tuple ==> (version:int, checksum: string)
+            # key: <localRelPath string of file>; value: Tuple ==> (<version:int>, <checksum:str>, <card_id:str>)
             "file_dict": {}
         }
 
-        
         async with websockets.connect(Ctx.BLOON_ADJ_API_WSS_URL, ssl=Ctx.API_WSS_SSL_CONTEXT, max_size=RemoteTreeDataManager.WSS_CLIENT_PAYLOAD_MAX_SIZE) as wss:
             api = WssApiCaller(wss)
             outData = await api.getShareInfo_async({"shareID": self.SHARE_ID})
@@ -205,7 +204,6 @@ class RemoteTreeDataManager:
                 # outData = outAll["data"]
                 # log.debug(outData)
                 log.info("This sharelink is not a folder.")
-
 
         self._treeData_remote_current = treeData
 
@@ -240,13 +238,12 @@ class RemoteTreeDataManager:
                     index += 1
                     childRelPath = localRelPath + "/" + Utils.getFileName(folderName, '', index)
 
-                
             treeData["folder_set"][childRelPath] = folderID
 
             if len(folder["childCardIDs"]) > 0:
                 retData = await api.getCardsMin_async({"shareID": shareID, "bloonID": bloonID, "cardIDs": folder["childCardIDs"]})
                 childCards = retData["cards"]
-                    
+
             self._handle_childFiles(childRelPath, childCards, treeData)
 
             if len(folder["childFolderIDs"]) > 0:

@@ -163,7 +163,8 @@ class DiffActionAgent:
         # directLinkRelPath = urllib.parse.quote(directLinkRelPath)  # url percent-encoding
 
         download_link = direct_link + "?c=" + card_id + "&dl"
-        log.info("[ACTION] download_link: [" + download_link + "]")
+        log.info("[ACTION] download file, fileRelPath: [" + fileRelPath + "]")
+        log.debug("[ACTION] download_link: [" + download_link + "]")
 
         file_abs_path = os.path.join(rtdm.WORK_DIR_ABS_PATH_STR, fileRelPath)
         # log.info("[ACTION] download file_abs_path: [" + file_abs_path + "]")
