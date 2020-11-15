@@ -30,7 +30,7 @@ class Main:
                 The following line shows how to get an ID from a sharelink:
                 https://www.bloon.io/share/[a sharelink ID]/
 
-                How to get a shearlink?
+                How to get a sharelink?
                 See https://www.bloon.io/help/sharelinks
                 """), "  "), formatter_class=RawTextHelpFormatter)
 

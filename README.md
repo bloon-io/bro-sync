@@ -2,9 +2,9 @@
 
 ## BLOON Read-Only Sync
 
-A command-line tool for synchronizing, batch downloading the folder you shared through a BLOON sharelink.
+A command-line tool for synchronizing and batch downloading the folder you shared through a BLOON sharelink.
 
-"Read-Only Sync" means download only, no changes in local will be synchronized to other devices.
+"Read-Only Sync" means download only; no changes in local will be synchronized to other devices.
 
 The following line shows how to get an ID from a sharelink:
 
@@ -12,7 +12,7 @@ The following line shows how to get an ID from a sharelink:
 https://www.bloon.io/share/[a sharelink ID]/
 ```
 
-How to get a shearlink? See [https://www.bloon.io/help/sharelinks][1]
+How to get a sharelink? See [https://www.bloon.io/help/sharelinks][1]
 
 ## Dependencies
 
@@ -44,7 +44,7 @@ usage: bro-sync.py [-h] [-s] [-q] [--detail] SHARE_ID WORK_DIR
   The following line shows how to get an ID from a sharelink:
   https://www.bloon.io/share/[a sharelink ID]/
 
-  How to get a shearlink?
+  How to get a sharelink?
   See https://www.bloon.io/help/sharelinks
 
 positional arguments:
