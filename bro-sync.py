@@ -57,6 +57,7 @@ class Main:
 
 if __name__ == "__main__":
     try:
-        asyncio.get_event_loop().run_until_complete(Main().main())
+        # asyncio.get_event_loop().run_until_complete(Main().main())
+        asyncio.run(Main().main())
     except KeyboardInterrupt:
         log.info("exit bro-sync...")
