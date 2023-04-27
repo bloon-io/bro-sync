@@ -28,16 +28,21 @@ class BroSync:
         self._err_retry_interval = Ctx.SYNC_ERR_RE_TRY_BASE_INTERVAL_SEC
 
     async def start_sync_once_async(self):
-        try:
-            await self.sync_once_async()
-        except BaseException as e:
-            errStr = str(e)
-            if errStr == "RESOURCE_NOT_EXIST":
-                log.error("the share id is invalid, please check !\n")
-                return
-            else:
-                log.error("exception reason: [" + errStr + "]")
-                # traceback.print_exc()
+        while True:
+            try:
+                await self.sync_once_async()
+                break
+            except BaseException as e:
+                errStr = str(e)
+                if errStr == "RESOURCE_NOT_EXIST":
+                    log.error("the share id is invalid, please check !\n")
+                    return
+                else:
+                    log.warning("exception reason: [" + errStr + "]")
+                    log.info("re-try after 3s...")
+                    await asyncio.sleep(3)
+                    # traceback.print_exc()
+        log.info("sync done.")
 
     async def start_sync_service_async(self):
         log.info("bro-sync servcie start...")
@@ -51,7 +56,7 @@ class BroSync:
                     log.error("the share id is invalid, please check !\n")
                     return
                 else:
-                    log.info("exception reason: [" + errStr + "]")
+                    log.warning("exception reason: [" + errStr + "]")
                     log.info("re-try after 3s...")
                     await asyncio.sleep(3)
 
