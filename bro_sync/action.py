@@ -7,6 +7,7 @@ import shutil
 import logging
 from bro_sync.tree_data import RemoteTreeDataManager
 from bro_sync.ctx import Ctx
+import time
 
 log = logging.getLogger("bro-sync")
 
@@ -150,9 +151,18 @@ class DiffActionAgent:
                     DiffActionAgent._createFileByCopy(rtdm, fileRelPath, same_file_rel_path_previous)
                 except BaseException as e:
                     log.info("[IGNORABLE] copy file exception. e: [" + str(e) + "]")
-                    DiffActionAgent._createFileByDownload(rtdm, fileRelPath)
+                    succ = DiffActionAgent._createFileByDownload_untilSucc(rtdm, fileRelPath)
             else:
-                DiffActionAgent._createFileByDownload(rtdm, fileRelPath)
+                succ = DiffActionAgent._createFileByDownload_untilSucc(rtdm, fileRelPath)
+
+    @staticmethod
+    def _createFileByDownload_untilSucc(rtdm, fileRelPath):
+        succ = False
+        while not succ:
+            succ = DiffActionAgent._createFileByDownload(rtdm, fileRelPath)
+            if not succ:
+                log.info("re-try download after 3s...")
+                time.sleep(3)
 
     @staticmethod
     def _createFileByDownload(rtdm, fileRelPath):
@@ -172,7 +182,16 @@ class DiffActionAgent:
         if Ctx.CLOSE_SSL_CERT_VERIFY:
             ssl._create_default_https_context = ssl._create_unverified_context
 
+        req = urllib.request.Request(download_link, method="HEAD")
+        response = urllib.request.urlopen(req)
+        file_size_remote = int(response.headers.get("Content-Length", 0))
+
         urllib.request.urlretrieve(download_link, file_abs_path)
+        file_size_local = os.path.getsize(file_abs_path)
+        if file_size_remote != file_size_local:
+            log.warn("[WARN] file size not match. (" + file_size_local + "/" + file_size_remote + ")")
+            return False
+        return True
 
     @staticmethod
     def _createFoldersByDiff(rtdm):
