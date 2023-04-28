@@ -189,7 +189,7 @@ class DiffActionAgent:
         urllib.request.urlretrieve(download_link, file_abs_path)
         file_size_local = os.path.getsize(file_abs_path)
         if file_size_remote != file_size_local:
-            log.warn("[WARN] file size not match. (" + file_size_local + "/" + file_size_remote + ")")
+            log.warn("[WARN] file size not match. (" + str(file_size_local) + "/" + str(file_size_remote) + ")")
             return False
         return True
 
