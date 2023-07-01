@@ -114,8 +114,15 @@ class RemoteTreeDataManager:
         file_dict__previous = {} if self._treeData_remote_previous is None else self._treeData_remote_previous["file_dict"]
 
         # all new file path need to download
-        deff_file_set = file_dict__current.keys() - file_dict__previous.keys()
-        file_paths_need_to_download.extend(deff_file_set)
+        diff_file_set = file_dict__current.keys() - file_dict__previous.keys()
+        for tmpPath in diff_file_set:
+            filePath = os.path.join(self.WORK_DIR_ABS_PATH_STR, tmpPath)
+            if os.path.isfile(filePath):
+                cksum__current = file_dict__current[tmpPath][1]
+                cksum__previous = Utils.getFileChecksum(filePath)
+                if cksum__current == cksum__previous:
+                    continue
+            file_paths_need_to_download.append(tmpPath)
 
         # all intersection file path need to compare version
         inter_set = file_dict__current.keys() & file_dict__previous.keys()

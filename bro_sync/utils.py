@@ -1,4 +1,5 @@
 import re
+import hashlib
 
 class Utils:
     @staticmethod
@@ -16,5 +17,10 @@ class Utils:
         dotExtension = '.' + extension if extension else ''
         return baseName + dotExtension if index == 0 else baseName + ' (' + str(index) + ')' + dotExtension
 
-
-
+    @staticmethod
+    def getFileChecksum(filePath):
+        sha = hashlib.sha1()
+        with open(filePath, "rb") as f:
+            for chunk in iter(lambda: f.read(4096), b""):
+                sha.update(chunk)
+        return sha.hexdigest()
