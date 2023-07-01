@@ -122,7 +122,9 @@ class RemoteTreeDataManager:
         for tmpPath in inter_set:
             v__current = file_dict__current[tmpPath][0]
             v__previous = file_dict__previous[tmpPath][0]
-            if v__current > v__previous:
+            id__current = file_dict__current[tmpPath][2]
+            id__previous = file_dict__previous[tmpPath][2]
+            if id__current != id__previous or v__current > v__previous:
                 file_paths_need_to_download.append(tmpPath)
 
         # log.debug("folder_paths_need_to_make: " + str(folder_paths_need_to_make))
