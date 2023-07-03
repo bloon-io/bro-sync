@@ -121,7 +121,7 @@ class RemoteTreeDataManager:
                 cksum__current = file_dict__current[tmpPath][1]
                 cksum__previous = Utils.getFileChecksum(filePath)
                 if cksum__current == cksum__previous:
-                    log.info("[IGNORABLE] same checksum, no download action required: [" + str(filePath) + "]")
+                    log.info("[IGNORABLE] same checksum, skip download. fileRelPath: [" + str(tmpPath) + "]")
                     continue
             file_paths_need_to_download.append(tmpPath)
 
