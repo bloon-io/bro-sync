@@ -32,10 +32,10 @@ class DiffActionAgent:
 
         treeData = rtdm.getPreviousTreeDataRemote()
         if treeData is not None:
-            pre_bloon_name = treeData["ctx"]["bloon_name"]
-            cur_bloon_name = rtdm.getCurrentTreeDataRemote()["ctx"]["bloon_name"]
-            if pre_bloon_name != cur_bloon_name:
-                pre_bloon_root_abs_path = os.path.join(rtdm.WORK_DIR_ABS_PATH_STR, pre_bloon_name)
+            pre_sharelink_folder_name = treeData["ctx"]["sharelink_folder_name"]
+            cur_sharelink_folder_name = rtdm.getCurrentTreeDataRemote()["ctx"]["sharelink_folder_name"]
+            if pre_sharelink_folder_name != cur_sharelink_folder_name:
+                pre_bloon_root_abs_path = os.path.join(rtdm.WORK_DIR_ABS_PATH_STR, pre_sharelink_folder_name)
                 log.info("[ACTION] rmtree: [" + pre_bloon_root_abs_path + "]")
                 shutil.rmtree(pre_bloon_root_abs_path)
 
@@ -168,8 +168,8 @@ class DiffActionAgent:
     def _createFileByDownload(rtdm, fileRelPath):
         direct_link = Ctx.BLOON_DIRECT_LINK_URL_BASE + "/" + rtdm.SHARE_ID
         card_id = rtdm.getCurrentTreeDataRemote()["file_dict"][fileRelPath][2]
-        # bloon_name = rtdm.getCurrentTreeDataRemote()["ctx"]["bloon_name"]
-        # directLinkRelPath = fileRelPath[len(bloon_name) + 1:]  # remove leading bloon name, "+1" is for char "/"
+        # sharelink_folder_name = rtdm.getCurrentTreeDataRemote()["ctx"]["sharelink_folder_name"]
+        # directLinkRelPath = fileRelPath[len(sharelink_folder_name) + 1:]  # remove leading bloon name, "+1" is for char "/"
         # directLinkRelPath = urllib.parse.quote(directLinkRelPath)  # url percent-encoding
 
         download_link = direct_link + "?c=" + card_id + "&dl"

@@ -177,7 +177,7 @@ class RemoteTreeDataManager:
         # Tree data to return
         treeData = {
             "ctx": {
-                "bloon_name": None
+                "sharelink_folder_name": None
             },
             # key: <localRelPath string of folder>; value: <folder ID>
             "folder_set": {},
@@ -230,7 +230,7 @@ class RemoteTreeDataManager:
 
             if not localRelPath:
                 # mean it is root
-                treeData["ctx"]["bloon_name"] = name
+                treeData["ctx"]["sharelink_folder_name"] = name
                 root_localRelPath = folderName
 
                 self._bloonRootDir = os.path.join(self.WORK_DIR_ABS_PATH_STR, root_localRelPath)
