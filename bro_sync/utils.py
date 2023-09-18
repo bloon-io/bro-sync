@@ -1,5 +1,6 @@
 import re
 import hashlib
+import sys
 from sqlitedict import SqliteDict
 
 class Utils:
@@ -42,3 +43,7 @@ class Utils:
         with SqliteDict(db_file_path, tablename="folder_set") as folder_set_db:
             for key, value in folder_set_db.items():
                 print(f'Key: {key}, Value: {value}')
+
+if __name__ == "__main__":
+    db_file_path = sys.argv[1]
+    Utils.show_db_content(db_file_path)
