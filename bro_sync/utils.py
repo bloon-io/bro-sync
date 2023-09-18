@@ -1,5 +1,6 @@
 import re
 import hashlib
+from sqlitedict import SqliteDict
 
 class Utils:
     @staticmethod
@@ -24,3 +25,20 @@ class Utils:
             for chunk in iter(lambda: f.read(4096), b""):
                 sha.update(chunk)
         return sha.hexdigest()
+
+    @staticmethod
+    def show_db_content(db_file_path):
+        print("---------- ctx ----------")
+        with SqliteDict(db_file_path, tablename="ctx") as ctx_db:
+            for key, value in ctx_db.items():
+                print(f'Key: {key}, Value: {value}')
+
+        print("---------- file_dict ----------")
+        with SqliteDict(db_file_path, tablename="file_dict") as file_dict_db:
+            for key, value in file_dict_db.items():
+                print(f'Key: {key}, Value: {value}')
+                
+        print("---------- folder_set ----------")
+        with SqliteDict(db_file_path, tablename="folder_set") as folder_set_db:
+            for key, value in folder_set_db.items():
+                print(f'Key: {key}, Value: {value}')
