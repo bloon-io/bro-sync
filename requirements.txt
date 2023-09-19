@@ -1,2 +1,2 @@
-websockets==10.4
+websockets==11.0.3
 sqlitedict==2.1.0

@@ -17,11 +17,11 @@ How to get a sharelink? See [https://www.bloon.io/help/sharelinks][1]
 ## Dependencies
 
 - Mac / Linux / Windows
-- Python 3.6+
+- Python 3.7+
 - [websockets][2]
 - [sqlitedict][3]
 
-The default python3 version in Ubuntu 16.04 is 3.5.2. You can see [this page][102] to know how to install Python 3.6+ in Ubuntu 16.04.
+The default python3 version in Ubuntu 16.04 is 3.5.2. You can see [this page][102] to know how to install Python 3.7+ in Ubuntu 16.04.
 
 ## Installation
 
@@ -91,4 +91,4 @@ sid="eXaMpLE88"; kill -9 $(ps aux | grep -v grep | grep "$sid" | awk '{print $2}
 [3]: https://pypi.org/project/sqlitedict/
 [100]: https://github.com/bloon-io/bro-sync/blob/master/README.md
 [101]: https://github.com/bloon-io/bro-sync/blob/master/misc/README_zh_TW.md
-[102]: https://github.com/bloon-io/bro-sync/blob/master/misc/ubuntu16.04_install_py3.6.md
+[102]: https://github.com/bloon-io/bro-sync/blob/master/misc/ubuntu16.04_install_py3.7.md

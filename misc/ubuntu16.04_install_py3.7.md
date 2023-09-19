@@ -12,19 +12,19 @@ $ sudo apt-get -y install zlib1g-dev build-essential checkinstall \
 Download source code from Python official site & unzip
 
 ```
-$ wget https://www.python.org/ftp/python/3.6.9/Python-3.6.9.tgz
-$ tar zxfv Python-3.6.9.tgz
+$ wget https://www.python.org/ftp/python/3.7.9/Python-3.7.9.tgz
+$ tar zxfv Python-3.7.9.tgz
 ```
 
-Build and install Python 3.6.9
+Build and install Python 3.7.9
 
 ```
-$ cd Python-3.6.9
+$ cd Python-3.7.9
 $ ./configure
 $ make
 $ make install
 ```
 
-P.S. You can change the version "3.6.9" above to other ones. Choose the version string you want in [this official FTP page][1].
+P.S. You can change the version "3.7.9" above to other ones. Choose the version string you want in [this official FTP page][1].
 
 [1]: https://www.python.org/ftp/python
