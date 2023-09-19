@@ -12,7 +12,7 @@ class Ctx:
     SYNC_ERR_RE_TRY_BASE_INTERVAL_SEC = 6
     SYNC_ERR_RE_TRY_BASE_INTERVAL_MAX_SEC = 20
 
-    DB_FILE_NAME = ".bro-sync.db"
+    DB_FILE_NAME_PREFIX = ".bro-sync.db"
     BLOON_DIRECT_LINK_URL_BASE = "https://direct.bloon.io/access"
     
     BLOON_ADJ_API_WSS_URL = "wss://adj.bloon.io/Bloon_Adjutant/api"

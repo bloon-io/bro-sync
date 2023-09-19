@@ -236,7 +236,7 @@ class RemoteTreeDataManager:
                 self._bloonRootDir = os.path.join(self.WORK_DIR_ABS_PATH_STR, root_localRelPath)
                 log.debug("_bloonRootDir: [" + self._bloonRootDir + "]")
 
-                self._broSyncDbFileAbsPath = os.path.join(self.WORK_DIR_ABS_PATH_STR, Ctx.DB_FILE_NAME)
+                self._broSyncDbFileAbsPath = os.path.join(self.WORK_DIR_ABS_PATH_STR, Ctx.DB_FILE_NAME_PREFIX + "." + shareID)
                 log.debug("_broSyncDbFileAbsPath: [" + self._broSyncDbFileAbsPath + "]")
 
                 childRelPath = root_localRelPath
