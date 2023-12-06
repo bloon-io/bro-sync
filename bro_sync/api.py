@@ -64,6 +64,24 @@ class WssApiListener:
             return True
         return False
     
+    async def startFileTransferListen(self, shareID):
+        params = {
+            "token": None,
+            "shareID": shareID
+        }
+        inData = {
+            "func_name": "listenShareTransfer", 
+            "cbID": "",
+            "params": params
+        }
+        reqStr = json.dumps(inData)
+        await self.wss.send(reqStr)
+        resStr = await self.wss.recv()
+        outData = json.loads(resStr)
+        if outData and outData["output_state"] == "OK":
+            return True
+        return False
+    
     async def recvEventMessage(self):
         log.debug("wait resv...")
         resStr = await self.wss.recv()

@@ -16,3 +16,5 @@ class Ctx:
     BLOON_DIRECT_LINK_URL_BASE = "https://direct.bloon.io/access"
     
     BLOON_ADJ_API_WSS_URL = "wss://adj.bloon.io/Bloon_Adjutant/api"
+
+    BLOON_BLINK_URL_SUFFIX = "/BloonLiteWireEndpoint"

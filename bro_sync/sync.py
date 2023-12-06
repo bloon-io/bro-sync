@@ -11,6 +11,7 @@ from bro_sync.tree_data import RemoteTreeDataManager
 from bro_sync.action import DiffActionAgent
 from bro_sync.ctx import Ctx
 from bro_sync.api import WssApiListener
+from bro_sync.transfer import FileTransfer
 
 
 log = logging.getLogger("bro-sync")
@@ -26,6 +27,32 @@ class BroSync:
         self._delay_mode = False
         self._in_sequence_recv_state = False
         self._err_retry_interval = Ctx.SYNC_ERR_RE_TRY_BASE_INTERVAL_SEC
+
+    async def start_transfer_file_async(self):
+        while True:
+            try:
+                async with websockets.connect(Ctx.BLOON_ADJ_API_WSS_URL, ssl=Ctx.API_WSS_SSL_CONTEXT) as wss:
+                    listener = WssApiListener(wss)
+                    if not await listener.startFileTransferListen(self.shareID):
+                        log.info("re-try after 5s...")
+                        await asyncio.sleep(5)
+                        continue
+                    log.info("[Action] waiting to receive file...")
+                    while True:
+                        eventData = await listener.recvEventMessage()
+                        if eventData and eventData["eventName"] == "requestFileTransfer":
+                            wireData = eventData["data"]
+                            fileTransfer = FileTransfer(wireData, self.workDir)
+                            result = await fileTransfer.start_receive_file_async()
+                            if result:
+                                log.info("receive done.")
+                            else:
+                                log.info("receive failed.")
+                            return
+            except BaseException as e:
+                log.warning("exception reason: [" + str(e) + "]")
+                log.info("re-try after 5s...")
+                await asyncio.sleep(5)
 
     async def start_sync_once_async(self):
         while True:
