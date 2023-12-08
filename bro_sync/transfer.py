@@ -78,11 +78,19 @@ class FileTransfer:
         self.endBlockIndex = int((self.fileSize + FileTransfer.FILE_BLOCK_SIZE - 1) / FileTransfer.FILE_BLOCK_SIZE)
         self.nextBlockIndex = int(0)
         self.requestBlockIndex = int(0)
+        self.isFinished = False
 
     async def start_receive_file_async(self):
         self.wire = BlinkWire(self.blinkAddress, self.handle_message_async)
         await self.wire.connect(self.wirePortID, self.pairWirePortID)
-        if self.nextBlockIndex == self.endBlockIndex:
+        if self.isFinished:
+            if not self.targetFile:
+                if not self._open_target_file():
+                    return False
+            self.targetFile.close()
+            recMBytes = self.fileSize / 1024 / 1024
+            outstr = "{0}\t\t\t {1:8.2f}MB ({2:3.1f}%)".format(self.fileName, recMBytes, 100)
+            print(outstr)
             return True
         elif self.nextBlockIndex > 0:
             print("")
@@ -97,6 +105,7 @@ class FileTransfer:
         elif flag == WireFlag.FROM_BLINK_DISCONNECT_FLAG:
             await self.wire.stopConnect()
         elif flag == WireFlag.FILE_TRANSFER_FINISH_FLAG:
+            self.isFinished = True
             await self.wire.sendTransferFinshAck()
         elif flag == WireFlag.FILE_BLOCK_FLAG:
             if not self._save_block_gram(message):
@@ -154,12 +163,7 @@ class FileTransfer:
             progress = self.nextBlockIndex * 100 / self.endBlockIndex
             outstr = "{0}\t\t\t {1:8.2f}MB ({2:3.1f}%)".format(self.fileName, recMBytes, progress)
             print(outstr, end='\r')
-        
-        if self.nextBlockIndex == self.endBlockIndex:
-            self.targetFile.close()
-            recMBytes = self.fileSize / 1024 / 1024
-            outstr = "{0}\t\t\t {1:8.2f}MB ({2:3.1f}%)".format(self.fileName, recMBytes, 100)
-            print(outstr)
+
         return True
 
     async def _send_request_async(self):
