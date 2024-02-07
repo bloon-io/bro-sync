@@ -37,9 +37,9 @@ $ pip3 install -r requirements.txt
 $ cd bro-sync
 $ python3 ./bro-sync.py
 
-usage: bro-sync.py [-h] [-s] [-q] [--detail] SHARE_ID WORK_DIR
+usage: bro-sync.py [-h] (-s WORK_DIR | -t dir_path) [-q] [--service] [--detail] SHARE_ID
 
-  To synchronize a folder you shared through a BLOON sharelink.
+  To synchronize the folder you shared through a BLOON sharelink.
 
   The following line shows how to get an ID from a sharelink:
   https://www.bloon.io/share/[a sharelink ID]/
@@ -48,14 +48,15 @@ usage: bro-sync.py [-h] [-s] [-q] [--detail] SHARE_ID WORK_DIR
   See https://www.bloon.io/help/sharelinks
 
 positional arguments:
-  SHARE_ID       A BLOON sharelink ID of your folder.
-  WORK_DIR       The place you want to put your sync. folder.
+  SHARE_ID                          A BLOON sharelink ID of your folder.
 
-optional arguments:
-  -h, --help     show this help message and exit
-  -s, --service  start and keep syncing
-  -q, --quiet    run quietly, show nothing on screen
-  --detail       show more details on screen
+options:
+  -h, --help                        show this help message and exit
+  -s, --sync WORK_DIR               start and keep syncing
+  -t, --no-stash-transfer dir_path  wait and receive file directly without staging in bloon
+  -q, --quiet                       run quietly, show nothing on screen
+  --service                         start and keep syncing
+  --detail                          show more details on screen
 ```
 
 ## 使用範例
@@ -63,19 +64,19 @@ optional arguments:
 僅進行一次同步 ( 即資料夾內容批次下載 )：
 
 ```
-$ python3 ./bro-sync.py eXaMpLE77 /home/patrick/myBroSyncHome
+$ python3 ./bro-sync.py eXaMpLE77 -s /home/patrick/myBroSyncHome
 ```
 
 將 bro-sync 啟動為服務，持續監測並同步其他裝置上的檔案異動：
 
 ```
-$ python3 ./bro-sync.py eXaMpLE77 ../myBroSyncHome --service
+$ python3 ./bro-sync.py eXaMpLE77 -s ../myBroSyncHome --service
 ```
 
 讓 bro-sync 服務在背景執行：
 
 ```
-$ python3 ./bro-sync.py -s eXaMpLE77 ../myBroSyncHome &
+$ python3 ./bro-sync.py --service -s eXaMpLE77 ../myBroSyncHome &
 ```
 
 要停止 bro-sync 服務，你可以按下「Ctrl + Break」中斷程式 ( 在非背景執行情況下 )，或是砍除應用程式。
